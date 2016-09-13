@@ -1,0 +1,40 @@
+m6_web_kafka:
+    event_dispatcher: true
+    producers:
+       producer1:
+           class: 'M6Web\Bundle\KafkaBundle\Fixtures\ProducerManagerStub'
+           service: 'm6_web_kafka.conf_stub'
+           conf:
+               metadata.broker.list: '127.0.0.1'
+           brokers:
+               - '127.0.0.1'
+               - '10.05.05.19'
+           log_level: '3'
+           topics:
+               test1000:
+                   conf:
+                       auto.commit.interval.ms: '1000'
+                   strategy_partition: '2'
+               test1005:
+                   conf:
+                       auto.commit.interval.ms: 1000
+                   strategy_partition: '2'
+
+    consumers:
+        consumer1:
+            class: 'M6Web\Bundle\KafkaBundle\Fixtures\ConsumerManagerStub'
+            service: 'm6_web_kafka.conf_stub'
+            conf:
+                metadata.broker.list: '127.0.0.1'
+            brokers:
+                 - '127.0.0.1'
+                 - '10.05.05.19'
+            log_level: '3'
+            timeout_consuming_queue: '1000'
+            topics:
+                test1000:
+                   conf:
+                       auto.commit.interval.ms: '1000'
+                test1001:
+                    conf:
+                        auto.commit.interval.ms: '1000'

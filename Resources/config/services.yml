@@ -1,0 +1,9 @@
+parameters:
+    m6_web_kafka.producer.class: 'M6Web\Bundle\KafkaBundle\Producer\ProducerManager'
+    m6_web_kafka.consumer.class: 'M6Web\Bundle\KafkaBundle\Consumer\ConsumerManager'
+
+services:
+    m6_web_kafka.conf:
+        class: 'M6Web\Bundle\KafkaBundle\ConfManager'
+    m6_web_kafka.conf_stub:
+        class: 'M6Web\Bundle\KafkaBundle\Fixtures\ConfManagerStub'
