@@ -1,0 +1,3 @@
+parameters:
+    m6_web_kafka.producer.class: 'M6Web\Bundle\KafkaBundle\ProducerManager'
+    m6_web_kafka.consumer.class: 'M6Web\Bundle\KafkaBundle\ConsumerManager'

@@ -1,0 +1,36 @@
+{
+  "name": "m6web/kafka-bundle",
+  "type" : "symfony-bundle",
+  "description": "Kafka bundle on top of rdkafka extension",
+  "keywords": ["Kafka", "bundle"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "M6Web",
+      "email": "opensource@m6web.fr",
+      "homepage": "http://tech.m6web.fr/"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "ext-rdkafka": "*"
+  },
+  "require-dev": {
+    "atoum/atoum": "~2.1",
+    "m6web/coke": "~2.1",
+    "m6web/symfony2-coding-standard": "~3.1",
+    "symfony/dependency-injection": "3.1.7",
+    "symfony/expression-language": "~3.1",
+    "symfony/event-dispatcher": "~3.1",
+    "symfony/config": "~3.1",
+    "symfony/yaml": "~3.1"
+  },
+  "autoload": {
+    "psr-4": {
+      "M6Web\\Bundle\\KafkaBundle\\": ""
+    }
+  },
+  "config": {
+    "bin-dir": "bin/"
+  }
+}
