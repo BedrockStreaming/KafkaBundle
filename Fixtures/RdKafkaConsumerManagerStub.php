@@ -3,24 +3,23 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\Fixtures;
 
-use M6Web\Bundle\KafkaBundle\AbstractManager;
-use M6Web\Bundle\KafkaBundle\Consumer\ConsumerManager;
+use M6Web\Bundle\KafkaBundle\AbstractRdKafkaManager;
+use M6Web\Bundle\KafkaBundle\Consumer\RdKafkaConsumerManager;
 use M6Web\Bundle\KafkaBundle\Consumer\TopicsConsumptionState;
-use M6Web\Bundle\KafkaBundle\Tests\Units\Producer\ProducerManager;
 
 /**
- * Class ConsumerManagerStub
+ * Class RdKafkaConsumerManagerStub
  * @package M6Web\Bundle\KafkaBundle\Fixtures
  *
- * A stub class to imitate ConsumerManager class
+ * A stub class to imitate RdKafkaConsumerManager class
  */
-class ConsumerManagerStub extends ConsumerManager
+class RdKafkaConsumerManagerStub extends RdKafkaConsumerManager
 {
     /**
      * @param \RdKafka $entity
      * @return $this
      */
-    public function setEntity(\RdKafka $entity): AbstractManager
+    public function setEntity(\RdKafka $entity): AbstractRdKafkaManager
     {
         return $this;
     }
@@ -29,7 +28,7 @@ class ConsumerManagerStub extends ConsumerManager
      * @param string $brokers
      * @return $this
      */
-    public function addBrokers(string $brokers): AbstractManager
+    public function addBrokers(string $brokers): AbstractRdKafkaManager
     {
         return $this;
     }
@@ -38,7 +37,7 @@ class ConsumerManagerStub extends ConsumerManager
      * @param int $logLevel
      * @return $this
      */
-    public function setLogLevel(int $logLevel): AbstractManager
+    public function setLogLevel(int $logLevel): AbstractRdKafkaManager
     {
         return $this;
     }
@@ -58,7 +57,7 @@ class ConsumerManagerStub extends ConsumerManager
      * @param TopicsConsumptionState $topicsConsumptionState
      * @return $this
      */
-    public function defineTopicsConsumptionState(TopicsConsumptionState $topicsConsumptionState): ConsumerManager
+    public function defineTopicsConsumptionState(TopicsConsumptionState $topicsConsumptionState): RdKafkaConsumerManager
     {
         return $this;
     }

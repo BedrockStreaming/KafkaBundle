@@ -3,22 +3,22 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\Fixtures;
 
-use M6Web\Bundle\KafkaBundle\AbstractManager;
-use M6Web\Bundle\KafkaBundle\Producer\ProducerManager;
+use M6Web\Bundle\KafkaBundle\AbstractRdKafkaManager;
+use M6Web\Bundle\KafkaBundle\Producer\RdKafkaProducerManager;
 
 /**
- * Class ProducerManagerStub
+ * Class RdKafkaProducerManagerStub
  * @package M6Web\Bundle\KafkaBundle\Fixtures
  *
  * A stub class to imitate ProducerManager class
  */
-class ProducerManagerStub extends ProducerManager
+class RdKafkaProducerManagerStub extends RdKafkaProducerManager
 {
     /**
      * @param \RdKafka $entity
      * @return $this
      */
-    public function setEntity(\RdKafka $entity): AbstractManager
+    public function setEntity(\RdKafka $entity): AbstractRdKafkaManager
     {
         return $this;
     }
@@ -27,7 +27,7 @@ class ProducerManagerStub extends ProducerManager
      * @param string $brokers
      * @return $this
      */
-    public function addBrokers(string $brokers): AbstractManager
+    public function addBrokers(string $brokers): AbstractRdKafkaManager
     {
         return $this;
     }
@@ -36,7 +36,7 @@ class ProducerManagerStub extends ProducerManager
      * @param int $logLevel
      * @return $this
      */
-    public function setLogLevel(int $logLevel): AbstractManager
+    public function setLogLevel(int $logLevel): AbstractRdKafkaManager
     {
         return $this;
     }

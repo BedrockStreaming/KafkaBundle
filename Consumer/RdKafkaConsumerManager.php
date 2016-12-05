@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\Consumer;
 
-use M6Web\Bundle\KafkaBundle\AbstractManager;
+use M6Web\Bundle\KafkaBundle\AbstractRdKafkaManager;
 use M6Web\Bundle\KafkaBundle\Exceptions\NoConsumeStartLaunchException;
 use M6Web\Bundle\KafkaBundle\Exceptions\NoTopicsConsumptionStateSetException;
 
@@ -13,7 +13,7 @@ use M6Web\Bundle\KafkaBundle\Exceptions\NoTopicsConsumptionStateSetException;
  *
  * A class to consume messages with topics set from the configuration or manually
  */
-class ConsumerManager extends AbstractManager
+class RdKafkaConsumerManager extends AbstractRdKafkaManager
 {
     const ORIGIN = 'consumer';
 
@@ -63,7 +63,7 @@ class ConsumerManager extends AbstractManager
      * @return $this
      * @throws \Exception
      */
-    public function defineTopicsConsumptionState(TopicsConsumptionState $topicsConsumptionState): ConsumerManager
+    public function defineTopicsConsumptionState(TopicsConsumptionState $topicsConsumptionState): RdKafkaConsumerManager
     {
         $this->checkIfEntitySet();
         $this->checkIfBrokersSet();
@@ -142,7 +142,7 @@ class ConsumerManager extends AbstractManager
             foreach ($partitions as $partitionNumber) {
                 $offset = $this->topicsConsumptionState->getOffsetForAPartitionForATopic($topicName, $partitionNumber);
 
-                $offsetToBegin = is_null($offset) || $offset === \RD_KAFKA_OFFSET_BEGINNING ? \RD_KAFKA_OFFSET_BEGINNING : $offset+1;
+                $offsetToBegin = ((is_null($offset) || $offset) === \RD_KAFKA_OFFSET_BEGINNING) ? \RD_KAFKA_OFFSET_BEGINNING : $offset + 1;
                 $newTopicToConsume->consumeQueueStart($partitionNumber, $offsetToBegin, $this->queue);
             }
         };

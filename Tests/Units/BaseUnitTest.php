@@ -94,7 +94,7 @@ class BaseUnitTest extends test
      *
      * @return \mock\RdKafka\Topic
      */
-    protected function getTopicMock($topicName = 'test'): \mock\RdKafka\Topic
+    protected function getTopicMock($topicName = 'test', $resultForProducing = true): \mock\RdKafka\Topic
     {
         $this->mockGenerator->orphanize('__construct');
         $this->mockGenerator->shuntParentClassCalls();
@@ -103,6 +103,9 @@ class BaseUnitTest extends test
 
         $mock->getMockController()->getName = $topicName;
         $mock->getMockController()->getTopic = $topicName;
+        $mock->getMockController()->produce = $resultForProducing ? $resultForProducing : function() {
+            throw new \Exception('Random error from Kafka itself');
+        };
         $mock->getMockController()->getPartitions = [$this->getPartitionMock()];
 
         return $mock;

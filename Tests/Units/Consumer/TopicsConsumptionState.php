@@ -5,7 +5,7 @@ use M6Web\Bundle\KafkaBundle\Consumer\TopicsConsumptionState as Base;
 use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 
 /**
- * Class ConsumerManager
+ * Class TopicsConsumptionState
  * @package M6Web\Bundle\KafkaBundle\Tests\Units\Consumer
  *
  * A class to test the topics consumption state
@@ -126,7 +126,7 @@ class TopicsConsumptionState extends BaseUnitTest
                 $topicsConsumptionState->defineAPartitionForATopic('topicName', 1);
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('Topic "topicName" not set')
+                ->hasMessage('Topic "topicName" not set')
         ;
     }
 
@@ -148,7 +148,7 @@ class TopicsConsumptionState extends BaseUnitTest
             ->exception(function () use ($topicsConsumptionState) {
                 $topicsConsumptionState->defineAPartitionForATopic('topicName', 4);
             })
-            ->isInstanceOf('\Exception')
+                ->isInstanceOf('\Exception')
                 ->hasMessage('Partition "4" for topic "topicName" does not exist')
         ;
     }
@@ -165,8 +165,8 @@ class TopicsConsumptionState extends BaseUnitTest
             ->exception(function () use ($topicsConsumptionState) {
                 $topicsConsumptionState->defineTopic('topicName');
             })
-            ->isInstanceOf('\Exception')
-            ->hasMessage('Topic "topicName" does not exist')
+                ->isInstanceOf('\Exception')
+                ->hasMessage('Topic "topicName" does not exist')
         ;
     }
 
@@ -251,7 +251,7 @@ class TopicsConsumptionState extends BaseUnitTest
                 $topicsConsumptionState->defineAPartitionForAUniqueTopicSet(1, 10);
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('Consumer gets several topics. You must specify which one to use')
+                ->hasMessage('Consumer gets several topics. You must specify which one to use')
         ;
     }
 
@@ -276,7 +276,7 @@ class TopicsConsumptionState extends BaseUnitTest
                 $topicsConsumptionState->getPartitionsForAUniqueTopicSet();
             })
             ->isInstanceOf('\Exception')
-                ->hasMessage('Consumer gets several topics. You must specify which one to use')
+            ->hasMessage('Consumer gets several topics. You must specify which one to use')
         ;
     }
 
@@ -301,7 +301,7 @@ class TopicsConsumptionState extends BaseUnitTest
                 $topicsConsumptionState->getOffsetForAPartitionForAUniqueTopicSet(1);
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('Consumer gets several topics. You must specify which one to use')
+                ->hasMessage('Consumer gets several topics. You must specify which one to use')
         ;
     }
 
@@ -325,7 +325,7 @@ class TopicsConsumptionState extends BaseUnitTest
                 $topicsConsumptionState->getOffsetForAPartitionForAUniqueTopicSet(1);
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('Partition "1" for topic "topicName" does not exist')
+                ->hasMessage('Partition "1" for topic "topicName" does not exist')
         ;
     }
 }

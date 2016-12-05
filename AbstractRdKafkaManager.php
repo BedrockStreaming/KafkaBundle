@@ -11,12 +11,12 @@ use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
- * Class AbstractManager
+ * Class AbstractRdKafkaManager
  * @package M6Web\Bundle\KafkaBundle
  *
  * A class for producer and consumer managers
  */
-abstract class AbstractManager
+abstract class AbstractRdKafkaManager
 {
     /**
      * @var int
@@ -65,9 +65,9 @@ abstract class AbstractManager
     /**
      * @param \RdKfaka $entity
      *
-     * @return AbstractManager
+     * @return AbstractRdKafkaManager
      */
-    public function setEntity(\RdKafka $entity): AbstractManager
+    public function setEntity(\RdKafka $entity): AbstractRdKafkaManager
     {
         $this->entity = $entity;
 
@@ -77,9 +77,9 @@ abstract class AbstractManager
     /**
      * @param integer $logLevel
      *
-     * @return AbstractManager
+     * @return AbstractRdKafkaManager
      */
-    public function setLogLevel(int $logLevel): AbstractManager
+    public function setLogLevel(int $logLevel): AbstractRdKafkaManager
     {
         $this->checkIfEntitySet();
 
@@ -92,9 +92,9 @@ abstract class AbstractManager
     /**
      * @param string $brokers
      *
-     * @return AbstractManager
+     * @return AbstractRdKafkaManager
      */
-    public function addBrokers(string $brokers): AbstractManager
+    public function addBrokers(string $brokers): AbstractRdKafkaManager
     {
         $this->checkIfEntitySet();
 
@@ -111,7 +111,7 @@ abstract class AbstractManager
      *
      * @return void
      */
-    public function addTopic(string $name, \RdKafka\TopicConf $rdKafkaTopicConf, array $confToSet = null)
+    public function addTopic(string $name, \RdKafka\TopicConf $rdKafkaTopicConf, array $confToSet = [])
     {
         $this->checkIfEntitySet();
         $this->checkIfBrokersSet();
@@ -119,11 +119,9 @@ abstract class AbstractManager
 
         $topicConf = new $rdKafkaTopicConf();
 
-        if (count($confToSet) > 0) {
-            array_walk($confToSet, function ($confValue, $confIndex) use ($topicConf) {
-                $topicConf->set($confIndex, (string) $confValue);
-            });
-        }
+        array_walk($confToSet, function ($confValue, $confIndex) use ($topicConf) {
+            $topicConf->set($confIndex, (string) $confValue);
+        });
 
         $this->topics[] = $this->entity->newTopic($name, $topicConf);
     }

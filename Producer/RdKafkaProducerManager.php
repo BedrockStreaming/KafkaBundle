@@ -3,7 +3,8 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\Producer;
 
-use M6Web\Bundle\KafkaBundle\AbstractManager;
+use M6Web\Bundle\KafkaBundle\AbstractRdKafkaManager;
+use M6Web\Bundle\KafkaBundle\Exceptions\KafkaException;
 use M6Web\Bundle\KafkaBundle\Exceptions\PartitionNotFoundException;
 
 /**
@@ -12,7 +13,7 @@ use M6Web\Bundle\KafkaBundle\Exceptions\PartitionNotFoundException;
  *
  * A class to produce messages
  */
-class ProducerManager extends AbstractManager
+class RdKafkaProducerManager extends AbstractRdKafkaManager
 {
 
     const ORIGIN = 'producer';
@@ -36,11 +37,11 @@ class ProducerManager extends AbstractManager
      */
     public function produce(string $message, int $partition = \RD_KAFKA_PARTITION_UA, string $key = null)
     {
-        $this->checkIfEntitySet();
-
-        $this->populateTopicsFromServer();
-
-        array_walk($this->topics, $this->produceForEachTopic($message, $partition, $key));
+        try {
+            array_walk($this->topics, $this->produceForEachTopic($message, $partition, $key));
+        } catch(\Exception $e) {
+            throw new KafkaException($e->getMessage());
+        }
 
         if ($this->eventDispatcher) {
             $this->notifyEvent(self::ORIGIN);
@@ -57,10 +58,6 @@ class ProducerManager extends AbstractManager
     protected function produceForEachTopic(string $message, int $partition, $key = null) : callable
     {
         return function ($topic) use ($message, $key, $partition) {
-            if ($partition !== -1 && !isset($this->topicsFromServer[$topic->getName()][$partition])) {
-                throw new PartitionNotFoundException();
-            }
-
             $topic->produce($partition, 0, $message);
         };
     }

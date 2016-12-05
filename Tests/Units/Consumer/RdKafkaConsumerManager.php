@@ -4,18 +4,18 @@ declare(strict_types = 1);
 namespace M6Web\Bundle\KafkaBundle\Tests\Units\Consumer;
 
 use M6Web\Bundle\KafkaBundle\Event\EventLog;
-use M6Web\Bundle\KafkaBundle\Consumer\ConsumerManager as Base;
+use M6Web\Bundle\KafkaBundle\Consumer\RdKafkaConsumerManager as Base;
 use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 use M6Web\Bundle\KafkaBundle\Consumer\TopicsConsumptionState;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 /**
- * Class ConsumerManager
+ * Class RdKafkaConsumerManager
  * @package M6Web\Bundle\KafkaBundle\Tests\Units\Consumer
  *
  * A class to test the consumer manager
  */
-class ConsumerManager extends BaseUnitTest
+class RdKafkaConsumerManager extends BaseUnitTest
 {
     /**
      * @return void
@@ -95,7 +95,7 @@ class ConsumerManager extends BaseUnitTest
                 $consumer->consume();
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('You should launch the "consume start" action')
+                ->hasMessage('You should launch the "consume start" action')
         ;
     }
 
@@ -174,7 +174,7 @@ class ConsumerManager extends BaseUnitTest
                 $consumer->defineTopicsConsumptionState(new TopicsConsumptionState());
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('Entity not set')
+                ->hasMessage('Entity not set')
         ;
     }
 
@@ -192,7 +192,7 @@ class ConsumerManager extends BaseUnitTest
                 $consumer->defineTopicsConsumptionState(new TopicsConsumptionState());
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('No broker set')
+                ->hasMessage('No broker set')
         ;
     }
 
@@ -211,7 +211,7 @@ class ConsumerManager extends BaseUnitTest
                 $consumer->defineTopicsConsumptionState(new TopicsConsumptionState());
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('Log level not set')
+                ->hasMessage('Log level not set')
         ;
     }
 
@@ -231,7 +231,7 @@ class ConsumerManager extends BaseUnitTest
                 $consumer->consumeStart();
             })
                 ->isInstanceOf('\Exception')
-                    ->hasMessage('No topics consumption state set')
+                ->hasMessage('No topics consumption state set')
         ;
     }
 
