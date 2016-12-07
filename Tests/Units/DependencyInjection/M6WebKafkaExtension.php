@@ -2,14 +2,9 @@
 
 namespace M6Web\Bundle\KafkaBundle\Tests\Units\DependencyInjection;
 
-use M6Web\Bundle\KafkaBundle\DependencyInjection\M6WebKafkaExtension as Base;
 use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use M6Web\Bundle\KafkaBundle\Producer\RdKafkaProducerManager;
-use M6Web\Bundle\KafkaBundle\Consumer\RdKafkaConsumerManager;
 
 /**
  * Class M6WebKafkaExtension
@@ -22,65 +17,72 @@ class M6WebKafkaExtension extends BaseUnitTest
     /**
      * @return void
      */
-    public function testShouldGetACorrectConfigurationForProducer()
-    {
-        $container = $this->getContainerForConfiguration('config');
-        $container->compile();
-
-        $this
-            ->boolean($container->has('m6_web_kafka.producer.producer1'))
-                ->isTrue()
-            ->object($producer = $container->get('m6_web_kafka.producer.producer1'))
-                ->isInstanceOf(RdKafkaProducerManager::class)
-        ;
-    }
-
-    /**
-     * @return void
-     */
     public function testShouldGetACorrectConfigurationForConsumer()
     {
-        $container = $this->getContainerForConfiguration('config');
+        $consumerDefinition = $this->getMockDefinition();
+        $container = $this->getContainerForConfiguration('config', $consumerDefinition);
         $container->compile();
 
         $this
             ->boolean($container->has('m6_web_kafka.consumer.consumer1'))
                 ->isTrue()
-            ->object($consumer = $container->get('m6_web_kafka.consumer.consumer1'))
-                ->isInstanceOf(RdKafkaConsumerManager::class)
+            ->mock($container)
+                ->call('setDefinition')
+                    ->withArguments('m6_web_kafka.consumer.consumer1', $consumerDefinition)
+                        ->atLeastOnce()
+            ;
+    }
+
+    /**
+     * @return void
+     */
+    public function testShouldGetACorrectConfigurationForProducer()
+    {
+        $producerDefinition = $this->getMockDefinition();
+        $container = $this->getContainerForConfiguration('config', $producerDefinition);
+        $container->compile();
+
+        $this
+            ->boolean($container->has('m6_web_kafka.producer.producer1'))
+                ->isTrue()
+            ->mock($container)
+                ->call('setDefinition')
+                    ->withArguments('m6_web_kafka.producer.producer1', $producerDefinition)
+                        ->atLeastOnce()
         ;
     }
 
     /**
-     * @param $fixtureName
+     * @param string                                                 $fixtureName
+     * @param \mock\Symfony\Component\DependencyInjection\Definition $definition
      *
-     * @return ContainerBuilder
+     * @return \mock\Symfony\Component\DependencyInjection\ContainerBuilder
      */
-    protected function getContainerForConfiguration($fixtureName): ContainerBuilder
+    protected function getContainerForConfiguration(string $fixtureName, $definition): \mock\Symfony\Component\DependencyInjection\ContainerBuilder
     {
-        $extension = new Base();
-        $parameterBag = new ParameterBag(array('kernel.debug' => true));
-        $container = new ContainerBuilder($parameterBag);
+        $extension = new \mock\M6Web\Bundle\KafkaBundle\DependencyInjection\M6WebKafkaExtension();
+        $extension->getMockController()->getConf = new \mock\RdKafka\Conf();
+        $extension->getMockController()->getDefinition = $definition;
+
+        $container = new \mock\Symfony\Component\DependencyInjection\ContainerBuilder();
         $container->set('event_dispatcher', $this->getEventDispatcherMock());
         $container->registerExtension($extension);
 
-        $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../../../Fixtures/'));
+        $loader = new YamlFileLoader($container, new FileLocator(__DIR__.'/../../../Tests/Fixtures/'));
         $loader->load($fixtureName.'.yml');
 
         return $container;
     }
 
     /**
-     * @return \mock\M6Web\Bundle\KafkaBundle\Conf
+     * @return \mock\Symfony\Component\DependencyInjection\Definition
      */
-    protected function getConfMock(): \mock\M6Web\Bundle\KafkaBundle\ConfManager
+    protected function getMockDefinition(): \mock\Symfony\Component\DependencyInjection\Definition
     {
-        $this->mockGenerator->orphanize('__construct');
-        $this->mockGenerator->shuntParentClassCalls();
+        $definition = new \mock\Symfony\Component\DependencyInjection\Definition();
+        $definition->getMockController()->addMethodCall = true;
+        $definition->getMockController()->getClass = 'M6Web\Bundle\KafkaBundle\FixturesRdKafkaConsumerManagerStub' ;
 
-        $mock = new \mock\M6Web\Bundle\KafkaBundle\ConfManager();
-        $mock->getMockController()->getConf = true;
-
-        return $mock;
+        return $definition;
     }
 }

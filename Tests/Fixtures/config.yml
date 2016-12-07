@@ -2,8 +2,6 @@ m6_web_kafka:
     event_dispatcher: true
     producers:
        producer1:
-           class: 'M6Web\Bundle\KafkaBundle\Fixtures\RdKafkaProducerManagerStub'
-           service: 'm6_web_kafka.conf_stub'
            conf:
                metadata.broker.list: '127.0.0.1'
            brokers:
@@ -22,8 +20,6 @@ m6_web_kafka:
 
     consumers:
         consumer1:
-            class: 'M6Web\Bundle\KafkaBundle\Fixtures\RdKafkaConsumerManagerStub'
-            service: 'm6_web_kafka.conf_stub'
             conf:
                 metadata.broker.list: '127.0.0.1'
             brokers:

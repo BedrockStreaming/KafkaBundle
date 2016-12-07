@@ -30,8 +30,6 @@ class Configuration implements ConfigurationInterface
                                     ->defaultValue(array())
                                     ->normalizeKeys(false)
                             ->end()
-                            ->scalarNode('class')->defaultValue('%m6_web_kafka.consumer.class%')->end()
-                            ->scalarNode('service')->defaultValue('m6_web_kafka.conf')->end()
                             ->arrayNode('brokers')
                                 ->prototype('scalar')->end()
                             ->end()

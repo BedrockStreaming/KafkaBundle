@@ -39,7 +39,7 @@ class RdKafkaProducerManager extends AbstractRdKafkaManager
     {
         try {
             array_walk($this->topics, $this->produceForEachTopic($message, $partition, $key));
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             throw new KafkaException($e->getMessage());
         }
 

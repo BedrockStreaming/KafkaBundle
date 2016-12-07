@@ -5,5 +5,3 @@ parameters:
 services:
     m6_web_kafka.conf:
         class: 'M6Web\Bundle\KafkaBundle\ConfManager'
-    m6_web_kafka.conf_stub:
-        class: 'M6Web\Bundle\KafkaBundle\Fixtures\ConfManagerStub'

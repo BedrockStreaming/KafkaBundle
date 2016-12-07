@@ -36,14 +36,31 @@ class M6WebKafkaExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
+     * @param Extension        $entity
+     * @return object
+     */
+    public function getConf(ContainerBuilder $container, $entity)
+    {
+        return $container->get('m6_web_kafka.conf')->getConf(new \RdKafka\Conf(), $entity['conf']);
+    }
+
+    /**
+     * @param string $className
+     * @return Definition
+     */
+    public function getDefinition(string $className): Definition
+    {
+        return new Definition($className);
+    }
+
+    /**
+     * @param ContainerBuilder $container
      * @param array            $config
      */
     protected function loadProducers(ContainerBuilder $container, array $config)
     {
         foreach ($config['producers'] as $key => $producer) {
-            $producerDefinition = new Definition(
-                $producer['class']
-            );
+            $producerDefinition = $this->getDefinition('M6Web\Bundle\KafkaBundle\Producer\RdKafkaProducerManager');
 
             $this->setEventDispatcher($config, $producerDefinition);
 
@@ -65,15 +82,14 @@ class M6WebKafkaExtension extends Extension
     protected function loadConsumers(ContainerBuilder $container, array $config)
     {
         foreach ($config['consumers'] as $key => $consumer) {
-            $consumerDefinition = new Definition(
-                $consumer['class']
-            );
+            $consumerDefinition = $this->getDefinition('M6Web\Bundle\KafkaBundle\Consumer\RdKafkaConsumerManager');
 
             $this->setEventDispatcher($config, $consumerDefinition);
 
             $consumerDefinition->addMethodCall('setEntity', [new \RdKafka\Consumer($this->getConf($container, $consumer))]);
             $this->setEntityManager($consumer, $consumerDefinition);
             $consumerDefinition->addMethodCall('defineTopicsConsumptionState', [new TopicsConsumptionState()]);
+
 
             $container->setDefinition(
                 sprintf('m6_web_kafka.consumer.%s', $key),
@@ -107,21 +123,13 @@ class M6WebKafkaExtension extends Extension
         $brokers = implode(',', $entity['brokers']);
 
         $entityDefinition
-            ->addMethodCall('addBrokers', [$brokers])
+            ->addMethodCall('addBrokers', [$brokers]);
+
+        $entityDefinition
             ->addMethodCall('setLogLevel', [$entity['log_level']]);
 
         foreach ($entity['topics'] as $topicName => $topic) {
             $entityDefinition->addMethodCall('addTopic', [$topicName, new \RdKafka\TopicConf(), $topic['conf']]);
         }
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     * @param Extension        $entity
-     * @return object
-     */
-    protected function getConf(ContainerBuilder $container, $entity)
-    {
-        return $container->get($entity['service'])->getConf(new \RdKafka\Conf(), $entity['conf']);
     }
 }

@@ -103,7 +103,7 @@ class BaseUnitTest extends test
 
         $mock->getMockController()->getName = $topicName;
         $mock->getMockController()->getTopic = $topicName;
-        $mock->getMockController()->produce = $resultForProducing ? $resultForProducing : function() {
+        $mock->getMockController()->produce = $resultForProducing ? $resultForProducing : function () {
             throw new \Exception('Random error from Kafka itself');
         };
         $mock->getMockController()->getPartitions = [$this->getPartitionMock()];
