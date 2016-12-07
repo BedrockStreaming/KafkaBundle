@@ -111,13 +111,17 @@ class RdKafkaConsumerManager extends AbstractRdKafkaManager
     /**
      * @return \RdKafka\Message
      */
-    public function consume(): \RdKafka\Message
+    public function consume()
     {
         if (is_null($this->queue)) {
             throw new NoConsumeStartLaunchException();
         }
 
         $msg = $this->queue->consume($this->timeoutConsumingQueue);
+
+        if (is_null($msg) || is_null($msg->payload)) {
+            return null;
+        }
 
         $this->topicsConsumptionState->defineTopic($msg->topic_name);
         $this->topicsConsumptionState->defineAPartitionForATopic($msg->topic_name, $msg->partition, $msg->offset);
@@ -142,7 +146,7 @@ class RdKafkaConsumerManager extends AbstractRdKafkaManager
             foreach ($partitions as $partitionNumber) {
                 $offset = $this->topicsConsumptionState->getOffsetForAPartitionForATopic($topicName, $partitionNumber);
 
-                $offsetToBegin = ((is_null($offset) || $offset) === \RD_KAFKA_OFFSET_BEGINNING) ? \RD_KAFKA_OFFSET_BEGINNING : $offset + 1;
+                $offsetToBegin = (is_null($offset) || $offset === \RD_KAFKA_OFFSET_BEGINNING) ? \RD_KAFKA_OFFSET_BEGINNING : $offset + 1;
                 $newTopicToConsume->consumeQueueStart($partitionNumber, $offsetToBegin, $this->queue);
             }
         };

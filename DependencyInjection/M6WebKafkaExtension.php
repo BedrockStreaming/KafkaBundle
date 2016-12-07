@@ -87,6 +87,7 @@ class M6WebKafkaExtension extends Extension
             $this->setEventDispatcher($config, $consumerDefinition);
 
             $consumerDefinition->addMethodCall('setEntity', [new \RdKafka\Consumer($this->getConf($container, $consumer))]);
+            $consumerDefinition->addMethodCall('setTimeoutConsumingQueue', [$consumer['timeout_consuming_queue']]);
             $this->setEntityManager($consumer, $consumerDefinition);
             $consumerDefinition->addMethodCall('defineTopicsConsumptionState', [new TopicsConsumptionState()]);
 
