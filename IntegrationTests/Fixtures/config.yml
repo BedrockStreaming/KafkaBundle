@@ -11,11 +11,6 @@ m6_web_kafka:
            topics:
                batman:
                    conf:
-                       auto.commit.interval.ms: '1000'
-                   strategy_partition: '2'
-               test1005:
-                   conf:
-                       auto.commit.interval.ms: 1000
                    strategy_partition: '2'
 
     consumers:

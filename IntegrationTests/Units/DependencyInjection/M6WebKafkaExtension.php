@@ -22,24 +22,7 @@ class M6WebKafkaExtension extends BaseUnitTest
     /**
      * @return void
      */
-    public function testShouldProduce()
-    {
-        $container = $this->getContainerForConfiguration('config');
-        $container->compile();
-
-        $this
-            ->boolean($container->has('m6_web_kafka.producer.producer1'))
-                ->isTrue()
-            ->object($producer = $container->get('m6_web_kafka.producer.producer1'))
-                ->isInstanceOf(RdKafkaProducerManager::class)
-            ->variable($producer->produce('\O/'))
-        ;
-    }
-
-    /**
-     * @return void
-     */
-    public function testShouldConsume()
+    public function testShouldProduceAMessageAndConsumeItAfter()
     {
         $container = $this->getContainerForConfiguration('config');
         $container->compile();
@@ -47,6 +30,9 @@ class M6WebKafkaExtension extends BaseUnitTest
         $this
             ->boolean($container->has('m6_web_kafka.consumer.consumer1'))
                 ->isTrue()
+            ->object($producer = $container->get('m6_web_kafka.producer.producer1'))
+                ->isInstanceOf(RdKafkaProducerManager::class)
+            ->variable($producer->produce('\O/'))
             ->object($consumer = $container->get('m6_web_kafka.consumer.consumer1'))
                 ->isInstanceOf(RdKafkaConsumerManager::class)
             ->variable($message1 = $consumer->consume())
@@ -63,7 +49,7 @@ class M6WebKafkaExtension extends BaseUnitTest
     protected function getContainerForConfiguration(string $fixtureName): ContainerBuilder
     {
         $extension = new Base();
-        $parameterBag = new ParameterBag(array('kernel.debug' => true));
+        $parameterBag = new ParameterBag(['kernel.debug' => true]);
         $container = new ContainerBuilder($parameterBag);
         $container->set('event_dispatcher', $this->getEventDispatcherMock());
         $container->registerExtension($extension);

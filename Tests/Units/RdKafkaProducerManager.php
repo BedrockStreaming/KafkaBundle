@@ -19,7 +19,7 @@ class RdKafkaProducerManager extends BaseUnitTest
     {
         $this
             ->given(
-                $producer = $this->getReadyBase()
+                $producer = $this->getReadyBase(true, $topicMock = $this->getTopicMock())
             )
             ->if(
                 $return = $producer->produce('message')
@@ -27,6 +27,10 @@ class RdKafkaProducerManager extends BaseUnitTest
             ->then
                 ->variable($return)
                     ->isNull()
+                ->mock($topicMock)
+                    ->call('produce')
+                        ->withArguments(RD_KAFKA_PARTITION_UA, 0, 'message')
+                            ->once()
             ;
     }
 
@@ -42,14 +46,14 @@ class RdKafkaProducerManager extends BaseUnitTest
                 $producer->setEventDispatcher($eventDispatcherMock)
             )
             ->exception(function () use ($producer) {
-                $producer->produce('message', 58);
+                $producer->produce('message', null, 58);
             })
                 ->isInstanceOf('M6Web\Bundle\KafkaBundle\Exceptions\KafkaException')
                 ->hasMessage('Random error from Kafka itself')
-                ->mock($eventDispatcherMock)
-                    ->call('dispatch')
-                        ->withArguments('kafka.event', new EventLog('producer'))
-                            ->never()
+            ->mock($eventDispatcherMock)
+                ->call('dispatch')
+                    ->withArguments('kafka.event', new EventLog('producer'))
+                        ->never()
         ;
     }
 
@@ -60,14 +64,18 @@ class RdKafkaProducerManager extends BaseUnitTest
     {
         $this
             ->given(
-                $producer = $this->getReadyBase()
+                $producer = $this->getReadyBase(true, $topicMock = $this->getTopicMock())
             )
             ->if(
-                $return = $producer->produce('message', RD_KAFKA_PARTITION_UA, '12345')
+                $return = $producer->produce('message', '12345')
             )
             ->then
                 ->variable($return)
                     ->isNull()
+                ->mock($topicMock)
+                    ->call('produce')
+                        ->withArguments(RD_KAFKA_PARTITION_UA, 0, 'message', '12345')
+                            ->once()
         ;
     }
 
@@ -204,13 +212,13 @@ class RdKafkaProducerManager extends BaseUnitTest
     /**
      * @return \mock\RdKafka\Producer
      */
-    protected function getRdKafkaProducerMock($resultForProducing = true)
+    protected function getRdKafkaProducerMock($resultForProducing = true, $topicMock = null)
     {
         $this->mockGenerator->orphanize('__construct');
         $this->mockGenerator->shuntParentClassCalls();
 
         $mock = new \mock\RdKafka\Producer();
-        $mock->getMockController()->newTopic = $this->getTopicMock('', $resultForProducing);
+        $mock->getMockController()->newTopic = $topicMock ?? $this->getTopicMock($resultForProducing);
 
         return $mock;
     }
@@ -218,10 +226,10 @@ class RdKafkaProducerManager extends BaseUnitTest
     /**
      * @return Base
      */
-    protected function getReadyBase(bool $resultForProducing = true): Base
+    protected function getReadyBase(bool $resultForProducing = true, $topicMock = null): Base
     {
         $producer = new Base();
-        $producer->setRdKafkaProducer($this->getRdKafkaProducerMock($resultForProducing));
+        $producer->setRdKafkaProducer($this->getRdKafkaProducerMock($resultForProducing, $topicMock));
         $producer->addBrokers('127.0.0.1');
         $producer->setLogLevel(3);
         $producer->addTopic('name', new \RdKafka\TopicConf(), ['auto.commit.interval.ms' => '1000']);
@@ -234,7 +242,7 @@ class RdKafkaProducerManager extends BaseUnitTest
      *
      * @return \mock\RdKafka\Topic
      */
-    protected function getTopicMock(string $topicName = 'test', bool $resultForProducing = true): \mock\RdKafka\Topic
+    protected function getTopicMock(bool $resultForProducing = true): \mock\RdKafka\Topic
     {
         $this->mockGenerator->orphanize('__construct');
         $this->mockGenerator->shuntParentClassCalls();

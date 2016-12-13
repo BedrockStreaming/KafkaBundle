@@ -34,18 +34,17 @@ class RdKafkaConsumerManager
     }
 
     /**
-     * @param array $name
+     * @param array $topicNames
      *
      * @return void
      */
-    public function addTopic(array $name)
+    public function addTopic(array $topicNames)
     {
-        $this->rdKafkaKafkaConsumer->subscribe($name);
+        $this->rdKafkaKafkaConsumer->subscribe($topicNames);
     }
 
     /**
      * @param \RdKafka\KafkaConsumer $kafkaConsumer
-     * @return $this
      */
     public function setRdKafkaKafkaConsumer(\RdKafka\KafkaConsumer $kafkaConsumer)
     {
@@ -54,8 +53,6 @@ class RdKafkaConsumerManager
 
     /**
      * @param int $timeoutConsumingQueue
-     *
-     * @return $this
      */
     public function setTimeoutConsumingQueue(int $timeoutConsumingQueue)
     {
@@ -70,21 +67,11 @@ class RdKafkaConsumerManager
     {
         $message =  $this->rdKafkaKafkaConsumer->consume($this->timeoutConsumingQueue);
 
-        if ($message->err === RD_KAFKA_RESP_ERR__PARTITION_EOF) {
-            return 'No more message';
-        }
-
-        if ($message->err === RD_KAFKA_RESP_ERR__TIMED_OUT) {
-            return 'Time out';
-        }
-
         if ($message->err === RD_KAFKA_RESP_ERR_NO_ERROR) {
-            $this->rdKafkaKafkaConsumer->commit();
+            $this->rdKafkaKafkaConsumer->commit($message);
             $this->notifyEvent($this->getOrigin());
-
-            return $message;
         }
 
-        throw new KafkaException($message->err);
+        return $message;
     }
 }

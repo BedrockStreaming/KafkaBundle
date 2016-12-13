@@ -121,7 +121,8 @@ topics:
 A producer will be used to send messages to the server.
 
 In the Kafka Model, messages are sent to topics partitioned and stored on brokers.
-It means that in the configuration for a producer you will have to specify the brokers, topics and optionnaly the log level and the strategy partitioner.
+This means that in the configuration for a producer you will have to specify the brokers and the topics.
+You can optionnaly configure the log level and the strategy partitioner.
 
 Because of RdKafka extension limitations, you cannot configure the partitions number or replication factor from the bundle. 
 You must do that from the command line.
@@ -148,7 +149,7 @@ A consumer will be used to get a message from different topics.
 You can choose to set only one topic by consumer.
 
 In the Kafka Model, messages are consumed from topics partitioned and stored on brokers.
-It means that for a consumer you will have to specify the brokers and topics in the configuration.
+This means that for a consumer you will have to specify the brokers and topics in the configuration.
 
 To consume messages, you will have to use the `consume` method to consume a message:
 ```php

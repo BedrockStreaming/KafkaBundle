@@ -3,6 +3,7 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\DependencyInjection;
 
+use M6Web\Bundle\KafkaBundle\Exceptions\KafkaException;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -73,7 +74,16 @@ class M6WebKafkaExtension extends Extension
             $rdKafkaProducer = new \RdKafka\Producer($conf);
 
             $producerDefinition->addMethodCall('setRdKafkaProducer', [$rdKafkaProducer]);
-            $this->setProducerManager($producer, $producerDefinition);
+
+            $producerDefinition
+                ->addMethodCall('addBrokers', [implode(',', $producer['brokers'])])
+                ->addMethodCall('setLogLevel', [$producer['log_level']]);
+
+            foreach ($producer['topics'] as $topicName => $topic) {
+                $topicConf = $this->getReadyTopicConf($topic['conf']);
+                $topicConf->setPartitioner((int) $topic['strategy_partition']);
+                $producerDefinition->addMethodCall('addTopic', [$topicName, $topicConf]);
+            }
 
             $container->setDefinition(
                 sprintf('m6_web_kafka.producer.%s', $key),
@@ -89,9 +99,9 @@ class M6WebKafkaExtension extends Extension
     protected function loadConsumers(ContainerBuilder $container, array $config)
     {
         foreach ($config['consumers'] as $key => $consumer) {
-            $consumerDefinition = $this->getDefinition('M6Web\Bundle\KafkaBundle\RdKafkaConsumerManager');
+            $consumerManager = $this->getDefinition('M6Web\Bundle\KafkaBundle\RdKafkaConsumerManager');
 
-            $this->setEventDispatcher($config, $consumerDefinition);
+            $this->setEventDispatcher($config, $consumerManager);
 
             $topicConf = $this->getReadyTopicConf($consumer['topicConf']);
             $conf = $this->getReadyRdKafkaConf($consumer['conf']);
@@ -99,13 +109,13 @@ class M6WebKafkaExtension extends Extension
 
             $kafkaConsumer = new \RdKafka\KafkaConsumer($conf);
 
-            $consumerDefinition->addMethodCall('setRdKafkaKafkaConsumer', [$kafkaConsumer]);
-            $consumerDefinition->addMethodCall('addTopic', [$consumer['topics'], $kafkaConsumer]);
-            $consumerDefinition->addMethodCall('setTimeoutConsumingQueue', [$consumer['timeout_consuming_queue']]);
+            $consumerManager->addMethodCall('setRdKafkaKafkaConsumer', [$kafkaConsumer]);
+            $consumerManager->addMethodCall('addTopic', [$consumer['topics'], $kafkaConsumer]);
+            $consumerManager->addMethodCall('setTimeoutConsumingQueue', [$consumer['timeout_consuming_queue']]);
 
             $container->setDefinition(
                 sprintf('m6_web_kafka.consumer.%s', $key),
-                $consumerDefinition
+                $consumerManager
             );
         }
     }
@@ -127,27 +137,6 @@ class M6WebKafkaExtension extends Extension
     }
 
     /**
-     * @param array      $entity
-     * @param Definition $entityDefinition
-     */
-    protected function setProducerManager(array $entity, Definition $entityDefinition)
-    {
-        $brokers = implode(',', $entity['brokers']);
-
-        $entityDefinition
-            ->addMethodCall('addBrokers', [$brokers]);
-
-        $entityDefinition
-            ->addMethodCall('setLogLevel', [$entity['log_level']]);
-
-        foreach ($entity['topics'] as $topicName => $topic) {
-            $topicConf = $this->getReadyTopicConf($topic['conf']);
-            $topicConf->setPartitioner((int) $topic['strategy_partition']);
-            $entityDefinition->addMethodCall('addTopic', [$topicName, $topicConf]);
-        }
-    }
-
-    /**
      * @param array $confToSet
      * @return \RdKafka\TopicConf
      */
@@ -155,9 +144,8 @@ class M6WebKafkaExtension extends Extension
     {
         $topicConf = $this->getTopicConf();
 
-        array_walk($confToSet, function ($confValue, $confIndex) use ($topicConf) {
-            $topicConf->set($confIndex, (string) $confValue);
-        });
+        $revertConfToSet = array_flip($confToSet);
+        array_walk($revertConfToSet, [$topicConf, 'set']);
 
         return $topicConf;
     }
@@ -172,9 +160,8 @@ class M6WebKafkaExtension extends Extension
     {
         $rdKafkaConf = $this->getRdKafkaConf();
 
-        array_walk($confToSet, function ($confValue, $confIndex) use ($rdKafkaConf) {
-            $rdKafkaConf->set($confIndex, (string) $confValue);
-        });
+        $revertConfToSet = array_flip($confToSet);
+        array_walk($revertConfToSet, [$rdKafkaConf, 'set']);
 
         // Set a rebalance callback to log automatically assign partitions
         $rdKafkaConf->setRebalanceCb($this->handlePartitionsAssignment());
@@ -188,19 +175,18 @@ class M6WebKafkaExtension extends Extension
     protected function handlePartitionsAssignment(): Callable
     {
         return function (\RdKafka\KafkaConsumer $kafka, $error, array $partitions = null) {
-            if ($error === RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS) {
-                $kafka->assign($partitions);
+            switch ($error) {
+                case RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS:
+                    $kafka->assign($partitions);
+                    break;
 
-                return;
+                case RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS:
+                    $kafka->assign(null);
+                    break;
+
+                default:
+                    throw new KafkaException($error);
             }
-
-            if ($error === RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS) {
-                $kafka->assign(null);
-
-                return;
-            }
-
-            throw new \Exception($error);
         };
     }
 }

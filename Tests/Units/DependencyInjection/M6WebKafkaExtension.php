@@ -81,7 +81,7 @@ class M6WebKafkaExtension extends BaseUnitTest
     protected function getMockDefinition(): \mock\Symfony\Component\DependencyInjection\Definition
     {
         $definition = new \mock\Symfony\Component\DependencyInjection\Definition();
-        $definition->getMockController()->addMethodCall = true;
+        $definition->getMockController()->addMethodCall = $definition;
         $definition->getMockController()->getClass = 'M6Web\Bundle\KafkaBundle\FixturesRdKafkaConsumerManagerStub' ;
 
         return $definition;

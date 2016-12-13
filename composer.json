@@ -13,7 +13,9 @@
   ],
   "require": {
     "php": ">=7.0",
-    "ext-rdkafka": "*"
+    "ext-rdkafka": "*",
+    "kwn/php-rdkafka-stubs": "^0.0.5",
+    "atoum/stubs": "^2.5"
   },
   "require-dev": {
     "atoum/atoum": "~2.1",

@@ -37,6 +37,7 @@ class RdKafkaProducerManager
      * @var array
      */
     protected $brokers;
+
     /**
      * @return string
      */
@@ -99,12 +100,12 @@ class RdKafkaProducerManager
 
     /**
      * @param string       $message
-     * @param integer      $partition
      * @param integer|null $key
+     * @param integer      $partition
      *
      * @return void
      */
-    public function produce(string $message, int $partition = RD_KAFKA_PARTITION_UA, string $key = null)
+    public function produce(string $message, string $key = null, int $partition = RD_KAFKA_PARTITION_UA)
     {
         try {
             array_walk($this->topics, $this->produceForEachTopic($message, $partition, $key));
@@ -122,10 +123,16 @@ class RdKafkaProducerManager
      *
      * @return callable
      */
-    protected function produceForEachTopic(string $message, int $partition, string $key = null) : callable
+    protected function produceForEachTopic(string $message, int $partition, string $key = null): callable
     {
         return function ($topic) use ($message, $key, $partition) {
-            $topic->produce($partition, 0, $message);
+            /*The second argument is the msgflags. It must be 0 as seen in the documentation:
+            https://arnaud-lb.github.io/php-rdkafka/phpdoc/rdkafka-producertopic.produce.html*/
+            if (is_null($key)) {
+                $topic->produce($partition, 0, $message);
+            } else {
+                $topic->produce($partition, 0, $message, $key);
+            }
         };
     }
 

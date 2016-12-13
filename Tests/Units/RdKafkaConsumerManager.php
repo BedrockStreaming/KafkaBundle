@@ -37,7 +37,8 @@ class RdKafkaConsumerManager extends BaseUnitTest
                             ->once()
                 ->mock($rdKafkaConsumerMock)
                     ->call('commit')
-                        ->once()
+                        ->withArguments($result)
+                            ->once()
         ;
     }
 
@@ -53,8 +54,9 @@ class RdKafkaConsumerManager extends BaseUnitTest
             )
             ->if($result = $consumer->consume())
             ->then
-                ->string($result)
-                    ->isEqualTo('No more message')
+                ->object($result)
+                ->integer($result->err)
+                    ->isEqualTo(RD_KAFKA_RESP_ERR__PARTITION_EOF)
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
                         ->never()
@@ -75,9 +77,10 @@ class RdKafkaConsumerManager extends BaseUnitTest
                 $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(RD_KAFKA_RESP_ERR__TIMED_OUT), true, $eventDispatcherMock)
             )
             ->if($result = $consumer->consume())
-                ->then
-                ->string($result)
-                    ->isEqualTo('Time out')
+            ->then
+                ->object($result)
+                ->integer($result->err)
+                    ->isEqualTo(RD_KAFKA_RESP_ERR__TIMED_OUT)
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
                         ->never()
@@ -97,11 +100,8 @@ class RdKafkaConsumerManager extends BaseUnitTest
                 $eventDispatcherMock = $this->getEventDispatcherMock(),
                 $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock('error'), true, $eventDispatcherMock)
             )
-            ->exception(function () use ($consumer) {
-                $consumer->consume();
-            })
-                ->isInstanceOf('M6Web\Bundle\KafkaBundle\Exceptions\KafkaException')
-                ->hasMessage('error')
+            ->if($consumer->consume())
+            ->then
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
                         ->never()
