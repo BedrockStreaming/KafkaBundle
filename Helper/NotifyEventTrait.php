@@ -1,12 +1,9 @@
 <?php
 declare(strict_types = 1);
 
-namespace M6Web\Bundle\KafkaBundle;
+namespace M6Web\Bundle\KafkaBundle\Helper;
 
 use M6Web\Bundle\KafkaBundle\Event\EventLog;
-use M6Web\Bundle\KafkaBundle\Exceptions\EntityNotSetException;
-use M6Web\Bundle\KafkaBundle\Exceptions\LogLevelNotSetException;
-use M6Web\Bundle\KafkaBundle\Exceptions\NoBrokerSetException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 

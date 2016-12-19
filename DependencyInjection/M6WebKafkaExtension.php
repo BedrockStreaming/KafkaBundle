@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\DependencyInjection;
 
-use M6Web\Bundle\KafkaBundle\Exceptions\KafkaException;
+use M6Web\Bundle\KafkaBundle\Helper\PartitionAssignment;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Extension\Extension;
@@ -66,7 +66,7 @@ class M6WebKafkaExtension extends Extension
     protected function loadProducers(ContainerBuilder $container, array $config)
     {
         foreach ($config['producers'] as $key => $producer) {
-            $producerDefinition = $this->getDefinition('M6Web\Bundle\KafkaBundle\RdKafkaProducerManager');
+            $producerDefinition = $this->getDefinition('M6Web\Bundle\KafkaBundle\Manager\RdKafkaProducerManager');
 
             $this->setEventDispatcher($config, $producerDefinition);
 
@@ -94,12 +94,12 @@ class M6WebKafkaExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param array $config
+     * @param array            $config
      */
     protected function loadConsumers(ContainerBuilder $container, array $config)
     {
         foreach ($config['consumers'] as $key => $consumer) {
-            $consumerManager = $this->getDefinition('M6Web\Bundle\KafkaBundle\RdKafkaConsumerManager');
+            $consumerManager = $this->getDefinition('M6Web\Bundle\KafkaBundle\Manager\RdKafkaConsumerManager');
 
             $this->setEventDispatcher($config, $consumerManager);
 
@@ -121,13 +121,13 @@ class M6WebKafkaExtension extends Extension
     }
 
     /**
-     * @param array $config
-     * @param $entityDefinition
+     * @param array      $config
+     * @param Definition $definition
      */
-    protected function setEventDispatcher(array $config, $entityDefinition)
+    protected function setEventDispatcher(array $config, Definition $definition)
     {
         if ($config['event_dispatcher'] === true) {
-            $entityDefinition->addMethodCall(
+            $definition->addMethodCall(
                 'setEventDispatcher',
                 [
                     new Reference('event_dispatcher'),
@@ -152,7 +152,6 @@ class M6WebKafkaExtension extends Extension
 
     /**
      * @param \RdKafka\Conf $rdKafkaConf
-     * @param array         $confData
      *
      * @return \RdKafka\Conf
      */
@@ -164,29 +163,8 @@ class M6WebKafkaExtension extends Extension
         array_walk($revertConfToSet, [$rdKafkaConf, 'set']);
 
         // Set a rebalance callback to log automatically assign partitions
-        $rdKafkaConf->setRebalanceCb($this->handlePartitionsAssignment());
+        $rdKafkaConf->setRebalanceCb(PartitionAssignment::handlePartitionsAssignment());
 
         return $rdKafkaConf;
-    }
-
-    /**
-     * @return Callable
-     */
-    protected function handlePartitionsAssignment(): Callable
-    {
-        return function (\RdKafka\KafkaConsumer $kafka, $error, array $partitions = null) {
-            switch ($error) {
-                case RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS:
-                    $kafka->assign($partitions);
-                    break;
-
-                case RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS:
-                    $kafka->assign(null);
-                    break;
-
-                default:
-                    throw new KafkaException($error);
-            }
-        };
     }
 }

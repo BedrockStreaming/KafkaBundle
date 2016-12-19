@@ -1,9 +1,10 @@
 <?php
 declare(strict_types = 1);
 
-namespace M6Web\Bundle\KafkaBundle;
+namespace M6Web\Bundle\KafkaBundle\Manager;
 
 use M6Web\Bundle\KafkaBundle\Exceptions\KafkaException;
+use M6Web\Bundle\KafkaBundle\Helper\NotifyEventTrait;
 
 /**
  * Class RdKafkaConsumerManager
@@ -16,7 +17,12 @@ class RdKafkaConsumerManager
     use NotifyEventTrait;
 
     /**
-     * @var \RdKafaka\Consumer
+     * @var \RdKafka\Message
+     */
+    protected $message;
+
+    /**
+     * @var \RdKafka\Consumer
      */
     protected $rdKafkaKafkaConsumer;
 
@@ -60,18 +66,28 @@ class RdKafkaConsumerManager
     }
 
     /**
-     * @return \RdKafka\Message|string
+     * @param bool $autoCommit
+     * @return \RdKafka\Message
+     *
      * @throws KafkaException
      */
-    public function consume()
+    public function consume(bool $autoCommit = true)
     {
-        $message =  $this->rdKafkaKafkaConsumer->consume($this->timeoutConsumingQueue);
+        $this->message =  $this->rdKafkaKafkaConsumer->consume($this->timeoutConsumingQueue);
 
-        if ($message->err === RD_KAFKA_RESP_ERR_NO_ERROR) {
-            $this->rdKafkaKafkaConsumer->commit($message);
-            $this->notifyEvent($this->getOrigin());
+        if ($this->message->err === RD_KAFKA_RESP_ERR_NO_ERROR && $autoCommit) {
+            $this->commit();
         }
 
-        return $message;
+        return $this->message;
+    }
+
+    /**
+     * @return void
+     */
+    public function commit()
+    {
+        $this->notifyEvent($this->getOrigin());
+        $this->rdKafkaKafkaConsumer->commit($this->message);
     }
 }

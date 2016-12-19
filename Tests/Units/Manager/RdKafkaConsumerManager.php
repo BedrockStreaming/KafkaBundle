@@ -1,11 +1,11 @@
 <?php
 declare(strict_types = 1);
 
-namespace M6Web\Bundle\KafkaBundle\Tests\Units;
+namespace M6Web\Bundle\KafkaBundle\Tests\Units\Manager;
 
 use M6Web\Bundle\KafkaBundle\Event\EventLog;
-use M6Web\Bundle\KafkaBundle\RdKafkaConsumerManager as Base;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use M6Web\Bundle\KafkaBundle\Manager\RdKafkaConsumerManager as Base;
+use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 
 /**
  * Class RdKafkaConsumerManager
@@ -39,6 +39,59 @@ class RdKafkaConsumerManager extends BaseUnitTest
                     ->call('commit')
                         ->withArguments($result)
                             ->once()
+        ;
+    }
+
+    /**
+     * @return void
+     */
+    public function testShouldCommitMessageAfterConsumingAndMessage()
+    {
+        $this
+            ->given(
+                $eventDispatcherMock = $this->getEventDispatcherMock(),
+                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(), true, $eventDispatcherMock)
+            )
+            ->if($result = $consumer->consume(false))
+            ->and($consumer->commit())
+            ->then
+                ->object($result)
+                    ->isInstanceOf('\RdKafka\Message')
+                ->integer(count($result))
+                    ->isEqualTo(1)
+                ->mock($eventDispatcherMock)
+                    ->call('dispatch')
+                        ->withArguments('kafka.event', new EventLog('consumer'))
+                            ->once()
+                ->mock($rdKafkaConsumerMock)
+                    ->call('commit')
+                        ->withArguments($result)
+                            ->once()
+        ;
+    }
+
+    /**
+     * @return void
+     */
+    public function testShouldCommitMessageWhenConsumingMessage()
+    {
+        $this
+            ->given(
+                $eventDispatcherMock = $this->getEventDispatcherMock(),
+                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(), true, $eventDispatcherMock)
+            )
+            ->if($result = $consumer->consume(false))
+            ->then
+                ->object($result)
+                    ->isInstanceOf('\RdKafka\Message')
+                ->integer(count($result))
+                    ->isEqualTo(1)
+                ->mock($eventDispatcherMock)
+                    ->call('dispatch')
+                        ->never()
+                ->mock($rdKafkaConsumerMock)
+                    ->call('commit')
+                        ->never()
         ;
     }
 
@@ -137,12 +190,12 @@ class RdKafkaConsumerManager extends BaseUnitTest
     }
 
     /**
-     * @param RdKafka\KafkaConsumer $rdKafkaConsumer
-     * @param bool                  $eventDispatcherSet
-     * @param null                  $eventDispatcherMock
+     * @param \RdKafka\KafkaConsumer $rdKafkaConsumer
+     * @param bool                   $eventDispatcherSet
+     * @param null                   $eventDispatcherMock
      * @return Base
      */
-    protected function getReadyBase($rdKafkaConsumer, $eventDispatcherSet = false, $eventDispatcherMock = null): Base
+    protected function getReadyBase(\RdKafka\KafkaConsumer $rdKafkaConsumer, bool $eventDispatcherSet = false, $eventDispatcherMock = null): Base
     {
         $consumer = new Base();
         $consumer->setRdKafkaKafkaConsumer($rdKafkaConsumer);

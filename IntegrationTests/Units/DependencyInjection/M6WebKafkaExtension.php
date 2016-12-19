@@ -8,8 +8,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use M6Web\Bundle\KafkaBundle\RdKafkaProducerManager;
-use M6Web\Bundle\KafkaBundle\RdKafkaConsumerManager;
+use M6Web\Bundle\KafkaBundle\Manager\RdKafkaProducerManager;
+use M6Web\Bundle\KafkaBundle\Manager\RdKafkaConsumerManager;
 
 /**
  * Class M6WebKafkaExtension

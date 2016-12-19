@@ -1,8 +1,9 @@
 <?php
-namespace M6Web\Bundle\KafkaBundle\Tests\Units;
+namespace M6Web\Bundle\KafkaBundle\Tests\Units\Manager;
 
 use M6Web\Bundle\KafkaBundle\Event\EventLog;
-use M6Web\Bundle\KafkaBundle\RdKafkaProducerManager as Base;
+use M6Web\Bundle\KafkaBundle\Manager\RdKafkaProducerManager as Base;
+use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 
 /**
  * Class RdKafkaProducerManager

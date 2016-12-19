@@ -1,12 +1,13 @@
 <?php
 declare(strict_types = 1);
 
-namespace M6Web\Bundle\KafkaBundle;
+namespace M6Web\Bundle\KafkaBundle\Manager;
 
 use M6Web\Bundle\KafkaBundle\Exceptions\EntityNotSetException;
 use M6Web\Bundle\KafkaBundle\Exceptions\KafkaException;
 use M6Web\Bundle\KafkaBundle\Exceptions\LogLevelNotSetException;
 use M6Web\Bundle\KafkaBundle\Exceptions\NoBrokerSetException;
+use M6Web\Bundle\KafkaBundle\Helper\NotifyEventTrait;
 
 /**
  * Class RdKafkaProducerManager
@@ -128,11 +129,7 @@ class RdKafkaProducerManager
         return function ($topic) use ($message, $key, $partition) {
             /*The second argument is the msgflags. It must be 0 as seen in the documentation:
             https://arnaud-lb.github.io/php-rdkafka/phpdoc/rdkafka-producertopic.produce.html*/
-            if (is_null($key)) {
-                $topic->produce($partition, 0, $message);
-            } else {
-                $topic->produce($partition, 0, $message, $key);
-            }
+            $topic->produce($partition, 0, $message, $key);
         };
     }
 
