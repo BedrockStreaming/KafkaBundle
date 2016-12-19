@@ -7,11 +7,27 @@ branches:
   only:
     - master
 
+before_install:
+  # disable xdebug
+  - phpenv config-rm xdebug.ini
+  # install librdkafka
+  - cd /tmp && git clone https://github.com/edenhill/librdkafka.git
+  - cd /tmp/librdkafka && ./configure
+  - make
+  - sudo make install
+
+  #install rdkafka
+  - cd /tmp && git clone https://github.com/arnaud-lb/php-rdkafka.git
+  - cd /tmp/php-rdkafka && phpize && ./configure
+  - sudo make all && sudo make install
+  - echo "extension = rdkafka.so" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+  - cd "$TRAVIS_BUILD_DIR"
+
 install:
     - composer install -n --dev
 
 script:
-    - bin/atoum -c .atoum.travis.php
+    - bin/atoum
 
 after_script:
     - wget https://scrutinizer-ci.com/ocular.phar
