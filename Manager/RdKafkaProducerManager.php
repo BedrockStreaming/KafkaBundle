@@ -51,7 +51,7 @@ class RdKafkaProducerManager
      * @param \RdKafka\Producer $entity
      * @return RdKafkaProducerManager
      */
-    public function setRdKafkaProducer(\RdKafka\Producer $entity): self
+    public function setProducer(\RdKafka\Producer $entity): self
     {
         $this->rdKafkaProducer = $entity;
 

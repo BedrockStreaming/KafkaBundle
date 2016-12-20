@@ -52,7 +52,7 @@ class RdKafkaConsumerManager
     /**
      * @param \RdKafka\KafkaConsumer $kafkaConsumer
      */
-    public function setRdKafkaKafkaConsumer(\RdKafka\KafkaConsumer $kafkaConsumer)
+    public function setConsumer(\RdKafka\KafkaConsumer $kafkaConsumer)
     {
         $this->rdKafkaKafkaConsumer = $kafkaConsumer;
     }

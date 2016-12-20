@@ -2,7 +2,7 @@
 namespace M6Web\Bundle\KafkaBundle\Tests\Units\Event;
 
 use atoum\test;
-use M6Web\Bundle\KafkaBundle\Event\EventLog as Base;
+use M6Web\Bundle\KafkaBundle\Event\KafkaEvent as Base;
 
 /**
  * Class EventLog
@@ -10,7 +10,7 @@ use M6Web\Bundle\KafkaBundle\Event\EventLog as Base;
  *
  * A class to test the EventLog
  */
-class EventLog extends test
+class KafkaEvent extends test
 {
     /**
      * @return void

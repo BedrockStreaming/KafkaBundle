@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\Tests\Units\Manager;
 
-use M6Web\Bundle\KafkaBundle\Event\EventLog;
+use M6Web\Bundle\KafkaBundle\Event\KafkaEvent;
 use M6Web\Bundle\KafkaBundle\Manager\RdKafkaConsumerManager as Base;
 use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 
@@ -33,7 +33,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
                     ->isEqualTo(1)
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
-                        ->withArguments('kafka.event', new EventLog('consumer'))
+                        ->withArguments('kafka.event', new KafkaEvent('consumer'))
                             ->once()
                 ->mock($rdKafkaConsumerMock)
                     ->call('commit')
@@ -61,7 +61,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
                     ->isEqualTo(1)
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
-                        ->withArguments('kafka.event', new EventLog('consumer'))
+                        ->withArguments('kafka.event', new KafkaEvent('consumer'))
                             ->once()
                 ->mock($rdKafkaConsumerMock)
                     ->call('commit')
@@ -198,7 +198,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
     protected function getReadyBase(\RdKafka\KafkaConsumer $rdKafkaConsumer, bool $eventDispatcherSet = false, $eventDispatcherMock = null): Base
     {
         $consumer = new Base();
-        $consumer->setRdKafkaKafkaConsumer($rdKafkaConsumer);
+        $consumer->setConsumer($rdKafkaConsumer);
         $consumer->addTopic(['name']);
         $consumer->setTimeoutConsumingQueue(1000);
 

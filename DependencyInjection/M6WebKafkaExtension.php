@@ -73,7 +73,7 @@ class M6WebKafkaExtension extends Extension
             $conf = $this->getReadyRdKafkaConf($producer['conf']);
             $rdKafkaProducer = new \RdKafka\Producer($conf);
 
-            $producerDefinition->addMethodCall('setRdKafkaProducer', [$rdKafkaProducer]);
+            $producerDefinition->addMethodCall('setProducer', [$rdKafkaProducer]);
 
             $producerDefinition
                 ->addMethodCall('addBrokers', [implode(',', $producer['brokers'])])
@@ -109,7 +109,7 @@ class M6WebKafkaExtension extends Extension
 
             $kafkaConsumer = new \RdKafka\KafkaConsumer($conf);
 
-            $consumerManager->addMethodCall('setRdKafkaKafkaConsumer', [$kafkaConsumer]);
+            $consumerManager->addMethodCall('setConsumer', [$kafkaConsumer]);
             $consumerManager->addMethodCall('addTopic', [$consumer['topics'], $kafkaConsumer]);
             $consumerManager->addMethodCall('setTimeoutConsumingQueue', [$consumer['timeout_consuming_queue']]);
 

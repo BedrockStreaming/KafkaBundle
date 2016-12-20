@@ -1,7 +1,7 @@
 <?php
 namespace M6Web\Bundle\KafkaBundle\Tests\Units\Manager;
 
-use M6Web\Bundle\KafkaBundle\Event\EventLog;
+use M6Web\Bundle\KafkaBundle\Event\KafkaEvent;
 use M6Web\Bundle\KafkaBundle\Manager\RdKafkaProducerManager as Base;
 use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 
@@ -53,7 +53,7 @@ class RdKafkaProducerManager extends BaseUnitTest
                 ->hasMessage('Random error from Kafka itself')
             ->mock($eventDispatcherMock)
                 ->call('dispatch')
-                    ->withArguments('kafka.event', new EventLog('producer'))
+                    ->withArguments('kafka.event', new KafkaEvent('producer'))
                         ->never()
         ;
     }
@@ -97,7 +97,7 @@ class RdKafkaProducerManager extends BaseUnitTest
             ->then
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
-                        ->withArguments('kafka.event', new EventLog('producer'))
+                        ->withArguments('kafka.event', new KafkaEvent('producer'))
                             ->once()
             ;
     }
@@ -181,7 +181,7 @@ class RdKafkaProducerManager extends BaseUnitTest
         $this
             ->given(
                 $producer = new Base(),
-                $producer->setRdKafkaProducer($this->getRdKafkaProducerMock())
+                $producer->setProducer($this->getRdKafkaProducerMock())
             )
             ->exception(function () use ($producer) {
                 $producer->addTopic('topicName', new \RdKafka\TopicConf());
@@ -199,7 +199,7 @@ class RdKafkaProducerManager extends BaseUnitTest
         $this
             ->given(
                 $producer = new Base(),
-                $producer->setRdKafkaProducer($this->getRdKafkaProducerMock()),
+                $producer->setProducer($this->getRdKafkaProducerMock()),
                 $producer->addBrokers('127.0.0.1')
             )
             ->exception(function () use ($producer) {
@@ -230,7 +230,7 @@ class RdKafkaProducerManager extends BaseUnitTest
     protected function getReadyBase(bool $resultForProducing = true, $topicMock = null): Base
     {
         $producer = new Base();
-        $producer->setRdKafkaProducer($this->getRdKafkaProducerMock($resultForProducing, $topicMock));
+        $producer->setProducer($this->getRdKafkaProducerMock($resultForProducing, $topicMock));
         $producer->addBrokers('127.0.0.1');
         $producer->setLogLevel(3);
         $producer->addTopic('name', new \RdKafka\TopicConf(), ['auto.commit.interval.ms' => '1000']);

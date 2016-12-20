@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\Helper;
 
-use M6Web\Bundle\KafkaBundle\Event\EventLog;
+use M6Web\Bundle\KafkaBundle\Event\KafkaEvent;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -42,7 +42,7 @@ trait NotifyEventTrait
         if ($this->eventDispatcher) {
             $this
                 ->eventDispatcher
-                ->dispatch('kafka.event', new EventLog($origin));
+                ->dispatch('kafka.event', new KafkaEvent($origin));
         }
     }
 }
