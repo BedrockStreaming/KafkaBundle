@@ -18,14 +18,14 @@ class PartitionAssignment
      */
     public static function handlePartitionsAssignment(): Callable
     {
-        return function (\RdKafka\KafkaConsumer $kafka, $error, array $partitions = null) {
+        return function (\RdKafka\KafkaConsumer $consumer, $error, array $partitions = null) {
             switch ($error) {
                 case RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS:
-                    $kafka->assign($partitions);
+                    $consumer->assign($partitions);
                     break;
 
                 case RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS:
-                    $kafka->assign(null);
+                    $consumer->assign(null);
                     break;
 
                 default:

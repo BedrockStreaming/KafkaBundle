@@ -10,19 +10,19 @@ use M6Web\Bundle\KafkaBundle\Exceptions\NoBrokerSetException;
 use M6Web\Bundle\KafkaBundle\Helper\NotifyEventTrait;
 
 /**
- * Class RdKafkaProducerManager
+ * Class ProducerManager
  * @package M6Web\Bundle\KafkaBundle
  *
  * @package M6Web\Bundle\KafkaBundle
  */
-class RdKafkaProducerManager
+class ProducerManager
 {
     use NotifyEventTrait;
 
     /**
      * @var \RdKafka\Producer
      */
-    protected $rdKafkaProducer;
+    protected $producer;
 
     /**
      * @var \RdKafka\Topic[]
@@ -49,24 +49,24 @@ class RdKafkaProducerManager
 
     /**
      * @param \RdKafka\Producer $entity
-     * @return RdKafkaProducerManager
+     * @return ProducerManager
      */
     public function setProducer(\RdKafka\Producer $entity): self
     {
-        $this->rdKafkaProducer = $entity;
+        $this->producer = $entity;
 
         return $this;
     }
 
     /**
      * @param int $logLevel
-     * @return RdKafkaProducerManager
+     * @return ProducerManager
      */
     public function setLogLevel(int $logLevel): self
     {
-        $this->checkIfRdKafkaProducerSet();
+        $this->checkIfProducerSet();
 
-        $this->rdKafkaProducer->setLogLevel($logLevel);
+        $this->producer->setLogLevel($logLevel);
         $this->logLevel = $logLevel;
 
         return $this;
@@ -74,13 +74,13 @@ class RdKafkaProducerManager
 
     /**
      * @param string $brokers
-     * @return RdKafkaProducerManager
+     * @return ProducerManager
      */
     public function addBrokers(string $brokers): self
     {
-        $this->checkIfRdKafkaProducerSet();
+        $this->checkIfProducerSet();
 
-        $this->rdKafkaProducer->addBrokers($brokers);
+        $this->producer->addBrokers($brokers);
         $this->brokers = $brokers;
 
         return $this;
@@ -88,15 +88,15 @@ class RdKafkaProducerManager
 
     /**
      * @param string             $name
-     * @param \RdKafka\TopicConf $topicConf
+     * @param \RdKafka\TopicConf $topicConfiguration
      */
-    public function addTopic(string $name, \RdKafka\TopicConf $topicConf)
+    public function addTopic(string $name, \RdKafka\TopicConf $topicConfiguration)
     {
-        $this->checkIfRdKafkaProducerSet();
+        $this->checkIfProducerSet();
         $this->checkIfBrokersSet();
         $this->checkIfLogLevelSet();
 
-        $this->topics[] = $this->rdKafkaProducer->newTopic($name, $topicConf);
+        $this->topics[] = $this->producer->newTopic($name, $topicConfiguration);
     }
 
     /**
@@ -136,9 +136,9 @@ class RdKafkaProducerManager
     /**
      * @throws EntityNotSetException
      */
-    protected function checkIfRdKafkaProducerSet()
+    protected function checkIfProducerSet()
     {
-        if (is_null($this->rdKafkaProducer)) {
+        if (is_null($this->producer)) {
             throw new EntityNotSetException();
         }
     }

@@ -2,7 +2,7 @@ m6_web_kafka:
     event_dispatcher: true
     producers:
        producer1:
-           conf:
+           configuration:
                metadata.broker.list: '127.0.0.1'
            brokers:
                - '127.0.0.1'
@@ -10,16 +10,16 @@ m6_web_kafka:
            log_level: '3'
            topics:
                batman:
-                   conf:
+                   configuration:
                    strategy_partition: '2'
 
     consumers:
         consumer1:
-            conf:
+            configuration:
                 metadata.broker.list: '127.0.0.1'
                 group.id: 'myConsumerGroup'
                 enable.auto.commit: '0'
-            topicConf:
+            topicConfiguration:
                 auto.offset.reset: 'smallest'
             timeout_consuming_queue: '120000'
             topics:

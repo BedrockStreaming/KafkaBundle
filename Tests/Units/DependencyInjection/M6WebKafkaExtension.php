@@ -62,8 +62,8 @@ class M6WebKafkaExtension extends BaseUnitTest
     {
         $extension = new \mock\M6Web\Bundle\KafkaBundle\DependencyInjection\M6WebKafkaExtension();
         $extension->getMockController()->getDefinition = $definition;
-        $extension->getMockController()->getRdKafkaConf = $this->getRdKafkaConfMock();
-        $extension->getMockController()->getTopicConf = $this->getTopicConfMock();
+        $extension->getMockController()->getConfigurationForConsumerOrProducer = $this->getConfigurationMock();
+        $extension->getMockController()->getTopicConfiguration = $this->getTopicConfMock();
 
         $container = new \mock\Symfony\Component\DependencyInjection\ContainerBuilder();
         $container->set('event_dispatcher', $this->getEventDispatcherMock());
@@ -82,7 +82,7 @@ class M6WebKafkaExtension extends BaseUnitTest
     {
         $definition = new \mock\Symfony\Component\DependencyInjection\Definition();
         $definition->getMockController()->addMethodCall = $definition;
-        $definition->getMockController()->getClass = 'M6Web\Bundle\KafkaBundle\FixturesRdKafkaConsumerManagerStub' ;
+        $definition->getMockController()->getClass = 'M6Web' ;
 
         return $definition;
     }
@@ -90,7 +90,7 @@ class M6WebKafkaExtension extends BaseUnitTest
     /**
      * @return \mock\RdKafka\Conf
      */
-    protected function getRdKafkaConfMock(): \mock\RdKafka\Conf
+    protected function getConfigurationMock(): \mock\RdKafka\Conf
     {
         $mock = new \mock\RdKafka\Conf();
         $mock->set('group.id', 'myConsumerGroup');

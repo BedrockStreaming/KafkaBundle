@@ -4,16 +4,16 @@ declare(strict_types = 1);
 namespace M6Web\Bundle\KafkaBundle\Tests\Units\Manager;
 
 use M6Web\Bundle\KafkaBundle\Event\KafkaEvent;
-use M6Web\Bundle\KafkaBundle\Manager\RdKafkaConsumerManager as Base;
+use M6Web\Bundle\KafkaBundle\Manager\ConsumerManager as Base;
 use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 
 /**
- * Class RdKafkaConsumerManager
+ * Class ConsumerManager
  * @package M6Web\Bundle\KafkaBundle\Tests\Units\Consumer
  *
  * A class to test the consumer manager
  */
-class RdKafkaConsumerManager extends BaseUnitTest
+class ConsumerManager extends BaseUnitTest
 {
     /**
      * @return void
@@ -23,7 +23,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
         $this
             ->given(
                 $eventDispatcherMock = $this->getEventDispatcherMock(),
-                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(), true, $eventDispatcherMock)
+                $consumer = $this->getReadyBase($consumerMock = $this->getConsumerMock(), true, $eventDispatcherMock)
             )
             ->if($result = $consumer->consume())
             ->then
@@ -35,7 +35,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
                     ->call('dispatch')
                         ->withArguments('kafka.event', new KafkaEvent('consumer'))
                             ->once()
-                ->mock($rdKafkaConsumerMock)
+                ->mock($consumerMock)
                     ->call('commit')
                         ->withArguments($result)
                             ->once()
@@ -50,7 +50,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
         $this
             ->given(
                 $eventDispatcherMock = $this->getEventDispatcherMock(),
-                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(), true, $eventDispatcherMock)
+                $consumer = $this->getReadyBase($consumerMock = $this->getConsumerMock(), true, $eventDispatcherMock)
             )
             ->if($result = $consumer->consume(false))
             ->and($consumer->commit())
@@ -63,7 +63,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
                     ->call('dispatch')
                         ->withArguments('kafka.event', new KafkaEvent('consumer'))
                             ->once()
-                ->mock($rdKafkaConsumerMock)
+                ->mock($consumerMock)
                     ->call('commit')
                         ->withArguments($result)
                             ->once()
@@ -78,7 +78,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
         $this
             ->given(
                 $eventDispatcherMock = $this->getEventDispatcherMock(),
-                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(), true, $eventDispatcherMock)
+                $consumer = $this->getReadyBase($consumerMock = $this->getConsumerMock(), true, $eventDispatcherMock)
             )
             ->if($result = $consumer->consume(false))
             ->then
@@ -89,7 +89,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
                         ->never()
-                ->mock($rdKafkaConsumerMock)
+                ->mock($consumerMock)
                     ->call('commit')
                         ->never()
         ;
@@ -103,7 +103,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
         $this
             ->given(
                 $eventDispatcherMock = $this->getEventDispatcherMock(),
-                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(RD_KAFKA_RESP_ERR__PARTITION_EOF), true, $eventDispatcherMock)
+                $consumer = $this->getReadyBase($consumerMock = $this->getConsumerMock(RD_KAFKA_RESP_ERR__PARTITION_EOF), true, $eventDispatcherMock)
             )
             ->if($result = $consumer->consume())
             ->then
@@ -113,7 +113,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
                         ->never()
-                ->mock($rdKafkaConsumerMock)
+                ->mock($consumerMock)
                     ->call('commit')
                         ->never()
         ;
@@ -127,7 +127,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
         $this
             ->given(
                 $eventDispatcherMock = $this->getEventDispatcherMock(),
-                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(RD_KAFKA_RESP_ERR__TIMED_OUT), true, $eventDispatcherMock)
+                $consumer = $this->getReadyBase($consumerMock = $this->getConsumerMock(RD_KAFKA_RESP_ERR__TIMED_OUT), true, $eventDispatcherMock)
             )
             ->if($result = $consumer->consume())
             ->then
@@ -137,7 +137,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
                         ->never()
-                ->mock($rdKafkaConsumerMock)
+                ->mock($consumerMock)
                     ->call('commit')
                         ->never()
         ;
@@ -151,14 +151,14 @@ class RdKafkaConsumerManager extends BaseUnitTest
         $this
             ->given(
                 $eventDispatcherMock = $this->getEventDispatcherMock(),
-                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock('error'), true, $eventDispatcherMock)
+                $consumer = $this->getReadyBase($consumerMock = $this->getConsumerMock('error'), true, $eventDispatcherMock)
             )
             ->if($consumer->consume())
             ->then
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
                         ->never()
-                ->mock($rdKafkaConsumerMock)
+                ->mock($consumerMock)
                     ->call('commit')
                         ->never()
         ;
@@ -172,7 +172,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
         $this
             ->given(
                 $eventDispatcherMock = $this->getEventDispatcherMock(),
-                $consumer = $this->getReadyBase($rdKafkaConsumerMock = $this->getRdKafkaConsumerMock(), false, $eventDispatcherMock)
+                $consumer = $this->getReadyBase($consumerMock = $this->getConsumerMock(), false, $eventDispatcherMock)
             )
             ->if($result = $consumer->consume())
             ->then
@@ -183,30 +183,30 @@ class RdKafkaConsumerManager extends BaseUnitTest
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
                         ->never()
-                ->mock($rdKafkaConsumerMock)
+                ->mock($consumerMock)
                     ->call('commit')
                         ->once()
         ;
     }
 
     /**
-     * @param \RdKafka\KafkaConsumer $rdKafkaConsumer
+     * @param \RdKafka\KafkaConsumer $consumer
      * @param bool                   $eventDispatcherSet
      * @param null                   $eventDispatcherMock
      * @return Base
      */
-    protected function getReadyBase(\RdKafka\KafkaConsumer $rdKafkaConsumer, bool $eventDispatcherSet = false, $eventDispatcherMock = null): Base
+    protected function getReadyBase(\RdKafka\KafkaConsumer $consumer, bool $eventDispatcherSet = false, $eventDispatcherMock = null): Base
     {
-        $consumer = new Base();
-        $consumer->setConsumer($rdKafkaConsumer);
-        $consumer->addTopic(['name']);
-        $consumer->setTimeoutConsumingQueue(1000);
+        $consumerManager = new Base();
+        $consumerManager->setConsumer($consumer);
+        $consumerManager->addTopic(['name']);
+        $consumerManager->setTimeoutConsumingQueue(1000);
 
         if ($eventDispatcherSet) {
-            $consumer->setEventDispatcher($eventDispatcherMock);
+            $consumerManager->setEventDispatcher($eventDispatcherMock);
         }
 
-        return $consumer;
+        return $consumerManager;
     }
 
     /**
@@ -214,7 +214,7 @@ class RdKafkaConsumerManager extends BaseUnitTest
      *
      * @return \mock\RdKafka\KafkaConsumer
      */
-    protected function getRdKafkaConsumerMock($noError = true): \mock\RdKafka\KafkaConsumer
+    protected function getConsumerMock($noError = true): \mock\RdKafka\KafkaConsumer
     {
         $this->mockGenerator->orphanize('__construct');
         $this->mockGenerator->shuntParentClassCalls();

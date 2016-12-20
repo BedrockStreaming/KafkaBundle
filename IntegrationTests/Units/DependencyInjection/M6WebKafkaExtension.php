@@ -8,8 +8,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
-use M6Web\Bundle\KafkaBundle\Manager\RdKafkaProducerManager;
-use M6Web\Bundle\KafkaBundle\Manager\RdKafkaConsumerManager;
+use M6Web\Bundle\KafkaBundle\Manager\ProducerManager;
+use M6Web\Bundle\KafkaBundle\Manager\ConsumerManager;
 
 /**
  * Class M6WebKafkaExtension
@@ -31,10 +31,10 @@ class M6WebKafkaExtension extends BaseUnitTest
             ->boolean($container->has('m6_web_kafka.consumer.consumer1'))
                 ->isTrue()
             ->object($producer = $container->get('m6_web_kafka.producer.producer1'))
-                ->isInstanceOf(RdKafkaProducerManager::class)
+                ->isInstanceOf(ProducerManager::class)
             ->variable($producer->produce('\O/'))
             ->object($consumer = $container->get('m6_web_kafka.consumer.consumer1'))
-                ->isInstanceOf(RdKafkaConsumerManager::class)
+                ->isInstanceOf(ConsumerManager::class)
             ->variable($message1 = $consumer->consume())
             ->variable($message1->payload)
                 ->isEqualTo('\O/')

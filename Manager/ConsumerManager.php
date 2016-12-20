@@ -7,12 +7,12 @@ use M6Web\Bundle\KafkaBundle\Exceptions\KafkaException;
 use M6Web\Bundle\KafkaBundle\Helper\NotifyEventTrait;
 
 /**
- * Class RdKafkaConsumerManager
+ * Class ConsumerManager
  * @package M6Web\Bundle\KafkaBundle
  *
  * A class to consume messages with topics
  */
-class RdKafkaConsumerManager
+class ConsumerManager
 {
     use NotifyEventTrait;
 
@@ -24,7 +24,7 @@ class RdKafkaConsumerManager
     /**
      * @var \RdKafka\Consumer
      */
-    protected $rdKafkaKafkaConsumer;
+    protected $consumer;
 
     /**
      * @var int
@@ -46,15 +46,15 @@ class RdKafkaConsumerManager
      */
     public function addTopic(array $topicNames)
     {
-        $this->rdKafkaKafkaConsumer->subscribe($topicNames);
+        $this->consumer->subscribe($topicNames);
     }
 
     /**
-     * @param \RdKafka\KafkaConsumer $kafkaConsumer
+     * @param \RdKafka\KafkaConsumer $consumer
      */
-    public function setConsumer(\RdKafka\KafkaConsumer $kafkaConsumer)
+    public function setConsumer(\RdKafka\KafkaConsumer $consumer)
     {
-        $this->rdKafkaKafkaConsumer = $kafkaConsumer;
+        $this->consumer = $consumer;
     }
 
     /**
@@ -73,7 +73,7 @@ class RdKafkaConsumerManager
      */
     public function consume(bool $autoCommit = true)
     {
-        $this->message =  $this->rdKafkaKafkaConsumer->consume($this->timeoutConsumingQueue);
+        $this->message =  $this->consumer->consume($this->timeoutConsumingQueue);
 
         if ($this->message->err === RD_KAFKA_RESP_ERR_NO_ERROR && $autoCommit) {
             $this->commit();
@@ -88,6 +88,6 @@ class RdKafkaConsumerManager
     public function commit()
     {
         $this->notifyEvent($this->getOrigin());
-        $this->rdKafkaKafkaConsumer->commit($this->message);
+        $this->consumer->commit($this->message);
     }
 }

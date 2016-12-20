@@ -2,16 +2,16 @@
 namespace M6Web\Bundle\KafkaBundle\Tests\Units\Manager;
 
 use M6Web\Bundle\KafkaBundle\Event\KafkaEvent;
-use M6Web\Bundle\KafkaBundle\Manager\RdKafkaProducerManager as Base;
+use M6Web\Bundle\KafkaBundle\Manager\ProducerManager as Base;
 use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 
 /**
- * Class RdKafkaProducerManager
+ * Class ProducerManager
  * @package M6Web\Bundle\KafkaBundle\Tests\Units\Producer
  *
  * A class to test the producer manager
  */
-class RdKafkaProducerManager extends BaseUnitTest
+class ProducerManager extends BaseUnitTest
 {
     /**
      * @return void
@@ -181,7 +181,7 @@ class RdKafkaProducerManager extends BaseUnitTest
         $this
             ->given(
                 $producer = new Base(),
-                $producer->setProducer($this->getRdKafkaProducerMock())
+                $producer->setProducer($this->getProducerMock())
             )
             ->exception(function () use ($producer) {
                 $producer->addTopic('topicName', new \RdKafka\TopicConf());
@@ -199,7 +199,7 @@ class RdKafkaProducerManager extends BaseUnitTest
         $this
             ->given(
                 $producer = new Base(),
-                $producer->setProducer($this->getRdKafkaProducerMock()),
+                $producer->setProducer($this->getProducerMock()),
                 $producer->addBrokers('127.0.0.1')
             )
             ->exception(function () use ($producer) {
@@ -213,7 +213,7 @@ class RdKafkaProducerManager extends BaseUnitTest
     /**
      * @return \mock\RdKafka\Producer
      */
-    protected function getRdKafkaProducerMock($resultForProducing = true, $topicMock = null)
+    protected function getProducerMock($resultForProducing = true, $topicMock = null)
     {
         $this->mockGenerator->orphanize('__construct');
         $this->mockGenerator->shuntParentClassCalls();
@@ -230,7 +230,7 @@ class RdKafkaProducerManager extends BaseUnitTest
     protected function getReadyBase(bool $resultForProducing = true, $topicMock = null): Base
     {
         $producer = new Base();
-        $producer->setProducer($this->getRdKafkaProducerMock($resultForProducing, $topicMock));
+        $producer->setProducer($this->getProducerMock($resultForProducing, $topicMock));
         $producer->addBrokers('127.0.0.1');
         $producer->setLogLevel(3);
         $producer->addTopic('name', new \RdKafka\TopicConf(), ['auto.commit.interval.ms' => '1000']);
