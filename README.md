@@ -54,7 +54,7 @@ m6_web_kafka:
     event_dispatcher: true
     producers:
        producer1:
-           conf:
+           configuration:
                metadata.broker.list: '127.0.0.1'
            brokers:
                - '127.0.0.1'
@@ -62,21 +62,21 @@ m6_web_kafka:
            log_level: '3'
            topics:
                batman:
-                   conf:
+                   configuration:
                        auto.commit.interval.ms: '1000'
                    strategy_partition: '2'
                catwoman:
-                   conf:
+                   configuration:
                        auto.commit.interval.ms: 1000
                    strategy_partition: '2'
 
     consumers:
         consumer1:
-            conf:
+            configuration:
                 metadata.broker.list: '127.0.0.1'
                 group.id: 'myConsumerGroup'
                 enable.auto.commit: '0'
-            topicConf:
+            topicConfiguration:
                 auto.offset.reset: 'smallest'
             timeout_consuming_queue: '120000'
             topics:
@@ -88,7 +88,7 @@ Note that we decided to use the high level consumer.
 So you can set the "group.id" option in the consumer configuration.
 
 ```yaml
-conf:
+configuration:
   metadata.broker.list: '127.0.0.1'
   group.id: 'myConsumerGroup'
 ```
@@ -97,18 +97,18 @@ For the producers, we have one topic configuration for each topic:
 ```yaml
  topics:
    batman:
-       conf:
+       configuration:
            auto.commit.interval.ms: '1000'
        strategy_partition: '2'
    catwoman:
-       conf:
+       configuration:
            auto.commit.interval.ms: 1000
        strategy_partition: '2'
  ```
 
 Whereas for the consumers, we have one topic configuration for all topics:
 ```yaml
-topicConf:
+topicConfiguration:
     auto.offset.reset: 'smallest'
 timeout_consuming_queue: '120000'
 topics:
@@ -155,8 +155,18 @@ To consume messages, you will have to use the `consume` method to consume a mess
 ```php
 $consumer->consume();
 ```
-
 The messages will be automatically committed except if there is an error.
+But you can choose not to do it by adding an argument as following:
+```php
+$consumer->consume(false);
+```
+
+You can decide to commit manually your message with:
+```php
+$consumer->commit();
+```
+
+It will commit the last consumed message.
 
 It will give you an object `\RdKafka\Message` with information about the message : payload, topic, or partition for instance.
 It is the `\RdKafka\Message` from the [RdKafka extension](https://arnaud-lb.github.io/php-rdkafka/phpdoc/book.rdkafka.html).
