@@ -101,10 +101,11 @@ class ProducerManager
 
     /**
      * @param string       $message
-     * @param integer|null $key
+     * @param string|null  $key
      * @param integer      $partition
      *
      * @return void
+     * @throws KafkaException
      */
     public function produce(string $message, string $key = null, int $partition = RD_KAFKA_PARTITION_UA)
     {
@@ -120,7 +121,7 @@ class ProducerManager
     /**
      * @param string       $message
      * @param integer      $partition
-     * @param integer|null $key
+     * @param string|null  $key
      *
      * @return callable
      */

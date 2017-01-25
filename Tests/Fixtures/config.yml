@@ -7,16 +7,16 @@ m6_web_kafka:
            brokers:
                - '127.0.0.1'
                - '10.05.05.19'
-           log_level: '3'
+           log_level: 3
            topics:
                test1000:
                    configuration:
-                       auto.commit.interval.ms: '1000'
-                   strategy_partition: '2'
+                       auto.commit.interval.ms: 1000
+                   strategy_partition: 2
                test1005:
                    configuration:
                        auto.commit.interval.ms: 1000
-                   strategy_partition: '2'
+                   strategy_partition: 2
 
     consumers:
         consumer1:
@@ -26,6 +26,6 @@ m6_web_kafka:
                 enable.auto.commit: '0'
             topicConfiguration:
                 auto.offset.reset: 'smallest'
-            timeout_consuming_queue: '120000'
+            timeout_consuming_queue: 120000
             topics:
                 - batman

@@ -1,0 +1,18 @@
+services:
+    kafka_configuration:
+        class: 'RdKafka\Conf'
+
+    kafka_topic_configuration:
+        class: 'RdKafka\TopicConf'
+
+    m6web_kafka.producer_factory:
+        class: 'M6Web\Bundle\KafkaBundle\Factory\ProducerFactory'
+        arguments:
+            - "@kafka_configuration"
+            - "@kafka_topic_configuration"
+
+    m6web_kafka.consumer_factory:
+        class: 'M6Web\Bundle\KafkaBundle\Factory\ConsumerFactory'
+        arguments:
+            - "@kafka_configuration"
+            - "@kafka_topic_configuration"
