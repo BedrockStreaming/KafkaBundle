@@ -55,30 +55,30 @@ m6_web_kafka:
     producers:
        producer1:
            configuration:
-               metadata.broker.list: '127.0.0.1'
+               timeout.ms: 1000
            brokers:
                - '127.0.0.1'
                - '10.05.05.19'
-           log_level: '3'
+           log_level: 3
            topics:
                batman:
                    configuration:
-                       auto.commit.interval.ms: '1000'
-                   strategy_partition: '2'
+                       retries: 3
+                   strategy_partition: 2
                catwoman:
                    configuration:
-                       auto.commit.interval.ms: 1000
-                   strategy_partition: '2'
+                       retries: 3
+                   strategy_partition: 2
 
     consumers:
         consumer1:
             configuration:
                 metadata.broker.list: '127.0.0.1'
                 group.id: 'myConsumerGroup'
-                enable.auto.commit: '0'
+                enable.auto.commit: 0
             topicConfiguration:
                 auto.offset.reset: 'smallest'
-            timeout_consuming_queue: '120000'
+            timeout_consuming_queue: 200
             topics:
                 - batman
                 - catwoman
@@ -98,11 +98,11 @@ For the producers, we have one topic configuration for each topic:
  topics:
    batman:
        configuration:
-           auto.commit.interval.ms: '1000'
+           retries: 3
        strategy_partition: '2'
    catwoman:
        configuration:
-           auto.commit.interval.ms: 1000
+           retries: 3
        strategy_partition: '2'
  ```
 
@@ -110,7 +110,7 @@ Whereas for the consumers, we have one topic configuration for all topics:
 ```yaml
 topicConfiguration:
     auto.offset.reset: 'smallest'
-timeout_consuming_queue: '120000'
+timeout_consuming_queue: 200
 topics:
     - batman
     - catwoman
