@@ -2,7 +2,6 @@
 namespace M6Web\Bundle\KafkaBundle\Tests\Units\Manager;
 
 use M6Web\Bundle\KafkaBundle\Event\KafkaEvent;
-use M6Web\Bundle\KafkaBundle\Manager\ProducerManager as Base;
 use M6Web\Bundle\KafkaBundle\Tests\Units\BaseUnitTest;
 
 /**
@@ -20,10 +19,9 @@ class ProducerManager extends BaseUnitTest
     {
         $this
             ->given(
-                $producer = $this->getReadyBase(true, $topicMock = $this->getTopicMock())
-            )
-            ->if(
-                $return = $producer->produce('message')
+                $this->newTestedInstance(),
+                $this->getReadyBase($topicMock = $this->getTopicMock()),
+                $return = $this->testedInstance->produce('message')
             )
             ->then
                 ->variable($return)
@@ -43,17 +41,14 @@ class ProducerManager extends BaseUnitTest
         $eventDispatcherMock = $this->getEventDispatcherMock();
         $this
             ->given(
-                $producer = $this->getReadyBase(false),
-                $producer->setEventDispatcher($eventDispatcherMock)
+                $this->newTestedInstance(),
+                $this->getReadyBase(),
+                $this->testedInstance->setEventDispatcher($eventDispatcherMock),
+                $this->testedInstance->produce('message', null, 58)
             )
-            ->exception(function () use ($producer) {
-                $producer->produce('message', null, 58);
-            })
-                ->isInstanceOf('M6Web\Bundle\KafkaBundle\Exceptions\KafkaException')
-                ->hasMessage('Random error from Kafka itself')
             ->mock($eventDispatcherMock)
                 ->call('dispatch')
-                    ->withArguments('kafka.event', new KafkaEvent('producer'))
+                    ->withAtLeastArguments([KafkaEvent::EVENT_NAME])
                         ->never()
         ;
     }
@@ -65,10 +60,9 @@ class ProducerManager extends BaseUnitTest
     {
         $this
             ->given(
-                $producer = $this->getReadyBase(true, $topicMock = $this->getTopicMock())
-            )
-            ->if(
-                $return = $producer->produce('message', '12345')
+                $this->newTestedInstance(),
+                $this->getReadyBase($topicMock = $this->getTopicMock()),
+                $return = $this->testedInstance->produce('message', '12345')
             )
             ->then
                 ->variable($return)
@@ -88,18 +82,40 @@ class ProducerManager extends BaseUnitTest
         $eventDispatcherMock = $this->getEventDispatcherMock();
         $this
             ->given(
-                $producer = $this->getReadyBase(),
-                $producer->setEventDispatcher($eventDispatcherMock)
-            )
-            ->if(
-                $producer->produce('message')
+                $this->newTestedInstance(),
+                $this->getReadyBase(),
+                $this->testedInstance->setEventDispatcher($eventDispatcherMock),
+                $this->testedInstance->produce('message'),
+                $this->mockCallbackProduce()
             )
             ->then
                 ->mock($eventDispatcherMock)
                     ->call('dispatch')
-                        ->withArguments('kafka.event', new KafkaEvent('producer'))
+                        ->withAtLeastArguments([KafkaEvent::EVENT_NAME])
                             ->once()
             ;
+    }
+
+    /**
+     * @return void
+     */
+    public function testShouldNotifyAnEventWhenProducingWithError()
+    {
+        $eventDispatcherMock = $this->getEventDispatcherMock();
+        $this
+            ->given(
+                $this->newTestedInstance(),
+                $this->getReadyBase(),
+                $this->testedInstance->setEventDispatcher($eventDispatcherMock),
+                $this->testedInstance->produce('message'),
+                $this->mockCallbackProduce(false)
+            )
+            ->then
+                ->mock($eventDispatcherMock)
+                    ->call('dispatch')
+                        ->withAtLeastArguments([KafkaEvent::EVENT_ERROR_NAME])
+                            ->once()
+        ;
     }
 
     /**
@@ -110,10 +126,10 @@ class ProducerManager extends BaseUnitTest
         $eventDispatcherMock = $this->getEventDispatcherMock();
         $this
             ->given(
-                $producer = $this->getReadyBase()
-            )
-            ->if(
-                $producer->produce('message')
+                $this->newTestedInstance(),
+                $this->getReadyBase(),
+                $this->testedInstance->produce('message'),
+                $this->mockCallbackProduce()
             )
             ->then
                 ->mock($eventDispatcherMock)
@@ -128,11 +144,9 @@ class ProducerManager extends BaseUnitTest
     public function testShouldThrowAnExceptionWhenSettingLogOnEmptyEntity()
     {
         $this
-            ->given(
-                $producer = new Base()
-            )
-            ->exception(function () use ($producer) {
-                $producer->setLogLevel(2);
+            ->if($this->newTestedInstance())
+            ->exception(function () {
+                $this->testedInstance->setLogLevel(2);
             })
                 ->isInstanceOf('M6Web\Bundle\KafkaBundle\Exceptions\EntityNotSetException')
                 ->hasMessage('Entity not set')
@@ -145,11 +159,9 @@ class ProducerManager extends BaseUnitTest
     public function testShouldThrowAnExceptionWhenAddingBrokersOnEmptyEntity()
     {
         $this
-            ->given(
-                $producer = new Base()
-            )
-            ->exception(function () use ($producer) {
-                $producer->addBrokers('127.0.0.1');
+            ->if($this->newTestedInstance())
+            ->exception(function () {
+                $this->testedInstance->addBrokers('127.0.0.1');
             })
                 ->isInstanceOf('M6Web\Bundle\KafkaBundle\Exceptions\EntityNotSetException')
                 ->hasMessage('Entity not set')
@@ -162,11 +174,9 @@ class ProducerManager extends BaseUnitTest
     public function testShouldThrowAnExceptionWhenAddingTopicsOnEmptyEntity()
     {
         $this
-            ->given(
-                $producer = new Base()
-            )
-            ->exception(function () use ($producer) {
-                $producer->addTopic('127.0.0.1', new \RdKafka\TopicConf());
+            ->if($this->newTestedInstance())
+            ->exception(function () {
+                $this->testedInstance->addTopic('127.0.0.1', new \RdKafka\TopicConf());
             })
                 ->isInstanceOf('M6Web\Bundle\KafkaBundle\Exceptions\EntityNotSetException')
                 ->hasMessage('Entity not set')
@@ -180,11 +190,11 @@ class ProducerManager extends BaseUnitTest
     {
         $this
             ->given(
-                $producer = new Base(),
-                $producer->setProducer($this->getProducerMock())
+                $this->newTestedInstance(),
+                $this->testedInstance->setProducer($this->getProducerMock())
             )
-            ->exception(function () use ($producer) {
-                $producer->addTopic('topicName', new \RdKafka\TopicConf());
+            ->exception(function () {
+                $this->testedInstance->addTopic('topicName', new \RdKafka\TopicConf());
             })
                 ->isInstanceOf('M6Web\Bundle\KafkaBundle\Exceptions\NoBrokerSetException')
                 ->hasMessage('No broker set')
@@ -198,12 +208,12 @@ class ProducerManager extends BaseUnitTest
     {
         $this
             ->given(
-                $producer = new Base(),
-                $producer->setProducer($this->getProducerMock()),
-                $producer->addBrokers('127.0.0.1')
+                $this->newTestedInstance(),
+                $this->testedInstance->setProducer($this->getProducerMock()),
+                $this->testedInstance->addBrokers('127.0.0.1')
             )
-            ->exception(function () use ($producer) {
-                $producer->addTopic('topicName', new \RdKafka\TopicConf());
+            ->exception(function () {
+                $this->testedInstance->addTopic('topicName', new \RdKafka\TopicConf());
             })
                 ->isInstanceOf('M6Web\Bundle\KafkaBundle\Exceptions\LogLevelNotSetException')
                 ->hasMessage('Log level not set')
@@ -213,47 +223,58 @@ class ProducerManager extends BaseUnitTest
     /**
      * @return \mock\RdKafka\Producer
      */
-    protected function getProducerMock($resultForProducing = true, $topicMock = null)
+    protected function getProducerMock($topicMock = null)
     {
         $this->mockGenerator->orphanize('__construct');
         $this->mockGenerator->shuntParentClassCalls();
 
         $mock = new \mock\RdKafka\Producer();
-        $mock->getMockController()->newTopic = $topicMock ?? $this->getTopicMock($resultForProducing);
+        $mock->getMockController()->newTopic = $topicMock ?? $this->getTopicMock();
 
         return $mock;
     }
 
     /**
-     * @return Base
+     * @param null $topicMock
      */
-    protected function getReadyBase(bool $resultForProducing = true, $topicMock = null): Base
+    protected function getReadyBase($topicMock = null)
     {
-        $producer = new Base();
-        $producer->setProducer($this->getProducerMock($resultForProducing, $topicMock));
-        $producer->addBrokers('127.0.0.1');
-        $producer->setLogLevel(3);
-        $producer->addTopic('name', new \RdKafka\TopicConf(), ['auto.commit.interval.ms' => '1000']);
-
-        return $producer;
+        $this->testedInstance->setProducer($this->getProducerMock($topicMock));
+        $this->testedInstance->addBrokers('127.0.0.1');
+        $this->testedInstance->setLogLevel(3);
+        $this->testedInstance->addTopic('name', new \RdKafka\TopicConf(), ['auto.commit.interval.ms' => '1000']);
     }
 
     /**
-     * @param string $topicName
-     *
      * @return \mock\RdKafka\Topic
      */
-    protected function getTopicMock(bool $resultForProducing = true): \mock\RdKafka\Topic
+    protected function getTopicMock(): \mock\RdKafka\Topic
     {
         $this->mockGenerator->orphanize('__construct');
         $this->mockGenerator->shuntParentClassCalls();
 
         $mock = new \mock\RdKafka\Topic();
-
-        $mock->getMockController()->produce = $resultForProducing ? $resultForProducing : function () {
-            throw new \Exception('Random error from Kafka itself');
-        };
+        $mock->getMockController()->produce = null;
+        $mock->getMockController()->getName = 'super topic';
 
         return $mock;
+    }
+
+    /**
+     * @param bool $resultForProducing
+     */
+    protected function mockCallbackProduce($resultForProducing = true)
+    {
+        $this->mockGenerator->shuntParentClassCalls();
+        $kafka = new \mock\RdKafka\Producer();
+        if ($resultForProducing) {
+            $message = new \RdKafka\Message();
+            $message->err = RD_KAFKA_RESP_ERR_NO_ERROR;
+            $message->payload = 'message';
+            $message->topic_name = 'super topic';
+            $this->testedInstance->produceResponse($kafka, $message);
+        } else {
+            $this->testedInstance->produceError($kafka, RD_KAFKA_RESP_ERR__FAIL, 'failed');
+        }
     }
 }

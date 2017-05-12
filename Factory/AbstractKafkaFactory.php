@@ -3,8 +3,6 @@ declare(strict_types = 1);
 
 namespace M6Web\Bundle\KafkaBundle\Factory;
 
-use M6Web\Bundle\KafkaBundle\Helper\PartitionAssignment;
-
 /**
  * Class AbstractKafkaFactory
  */
@@ -41,9 +39,6 @@ class AbstractKafkaFactory
     {
         $revertConfigurationToSet = array_flip($configurationToSet);
         array_walk($revertConfigurationToSet, [$this->configuration, 'set']);
-
-        // Set a rebalance callback to log automatically assign partitions
-        $this->configuration->setRebalanceCb(PartitionAssignment::handlePartitionsAssignment());
     }
 
     /**

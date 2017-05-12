@@ -7,7 +7,9 @@ use M6Web\Bundle\KafkaBundle\Exceptions\EntityNotSetException;
 use M6Web\Bundle\KafkaBundle\Exceptions\KafkaException;
 use M6Web\Bundle\KafkaBundle\Exceptions\LogLevelNotSetException;
 use M6Web\Bundle\KafkaBundle\Exceptions\NoBrokerSetException;
+use M6Web\Bundle\KafkaBundle\Exceptions\ProducerException;
 use M6Web\Bundle\KafkaBundle\Helper\NotifyEventTrait;
+use RdKafka\Topic;
 
 /**
  * Class ProducerManager
@@ -18,6 +20,11 @@ use M6Web\Bundle\KafkaBundle\Helper\NotifyEventTrait;
 class ProducerManager
 {
     use NotifyEventTrait;
+
+    /**
+     * max time in second
+     */
+    const MAX_TIME_WAITING_QUEUE_EMPTY = 1;
 
     /**
      * @var \RdKafka\Producer
@@ -38,6 +45,12 @@ class ProducerManager
      * @var array
      */
     protected $brokers;
+
+    /**
+     * event poll timeout in ms
+     * @var int
+     */
+    protected $eventsPollTimeout;
 
     /**
      * @return string
@@ -87,6 +100,18 @@ class ProducerManager
     }
 
     /**
+     * @param int $timeout ms
+     *
+     * @return ProducerManager
+     */
+    public function setEventsPollTimeout(int $timeout): self
+    {
+        $this->eventsPollTimeout = $timeout;
+
+        return $this;
+    }
+
+    /**
      * @param string             $name
      * @param \RdKafka\TopicConf $topicConfiguration
      */
@@ -100,9 +125,9 @@ class ProducerManager
     }
 
     /**
-     * @param string       $message
-     * @param string|null  $key
-     * @param integer      $partition
+     * @param string      $message
+     * @param string|null $key
+     * @param integer     $partition
      *
      * @return void
      * @throws KafkaException
@@ -111,11 +136,44 @@ class ProducerManager
     {
         try {
             array_walk($this->topics, $this->produceForEachTopic($message, $partition, $key));
+            $startPoll = microtime(true);
+            while ($this->producer->getOutQLen() > 0 && microtime(true) - $startPoll < self::MAX_TIME_WAITING_QUEUE_EMPTY) {
+                $this->producer->poll($this->eventsPollTimeout);
+            }
         } catch (\Exception $e) {
             throw new KafkaException($e->getMessage());
         }
+    }
 
-        $this->notifyEvent($this->getOrigin());
+    /**
+     * @param \RdKafka\Producer $kafka
+     * @param \RdKafka\Message  $message
+     *
+     * @throws ProducerException
+     */
+    public function produceResponse(\RdKafka\Producer $kafka, \RdKafka\Message $message)
+    {
+        // @codingStandardsIgnoreStart
+        $messageKey = md5($message->payload.$message->topic_name);
+        // @codingStandardsIgnoreEnd
+
+        if ($message->err == RD_KAFKA_RESP_ERR_NO_ERROR) {
+            $this->notifyEvent($messageKey);
+
+            return;
+        }
+
+        $this->notifyResponseErrorEvent($messageKey, $message->err);
+    }
+
+    /**
+     * @param \RdKafka\Producer $kafka
+     * @param int               $errorCode
+     * @param string            $reason
+     */
+    public function produceError(\RdKafka\Producer $kafka, int $errorCode, string $reason)
+    {
+        $this->notifyErrorEvent($this->getOrigin(), $errorCode, $reason);
     }
 
     /**
@@ -127,7 +185,8 @@ class ProducerManager
      */
     protected function produceForEachTopic(string $message, int $partition, string $key = null): callable
     {
-        return function ($topic) use ($message, $key, $partition) {
+        return function (Topic $topic) use ($message, $key, $partition) {
+            $this->prepareEvent($this->getOrigin(), md5($message.$topic->getName()));
             /*The second argument is the msgflags. It must be 0 as seen in the documentation:
             https://arnaud-lb.github.io/php-rdkafka/phpdoc/rdkafka-producertopic.produce.html*/
             $topic->produce($partition, 0, $message, $key);

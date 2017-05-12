@@ -25,7 +25,8 @@ class ProducerFactory extends BaseUnitTest
                     ],
                     'strategy_partition' => 2
                 ]
-            ]
+            ],
+            'events_poll_timeout' => -1
         ];
 
         $this
