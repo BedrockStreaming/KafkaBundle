@@ -55,6 +55,7 @@ class Configuration implements ConfigurationInterface
                                 ->prototype('scalar')->end()
                             ->end()
                             ->integerNode('log_level')->defaultValue(LOG_WARNING)->end()
+                            ->integerNode('events_poll_timeout')->defaultValue(500)->end()
                             ->arrayNode('topics')
                                 ->useAttributeAsKey('key')
                                 ->prototype('array')

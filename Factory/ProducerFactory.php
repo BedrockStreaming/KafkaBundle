@@ -20,12 +20,17 @@ class ProducerFactory extends AbstractKafkaFactory
     {
         $producerManager = new ProducerManager();
         $this->getReadyConfiguration($producerData['configuration']);
+
+        $this->configuration->setDrMsgCb([$producerManager, 'produceResponse']);
+        $this->configuration->setErrorCb([$producerManager, 'produceError']);
+
         $producer = new $producerClass($this->configuration);
 
         $producerManager->setProducer($producer);
         $producerManager
             ->addBrokers(implode(',', $producerData['brokers']))
             ->setLogLevel($producerData['log_level'])
+            ->setEventsPollTimeout($producerData['events_poll_timeout'])
         ;
 
         foreach ($producerData['topics'] as $topicName => $topic) {

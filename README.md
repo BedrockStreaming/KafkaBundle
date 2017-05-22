@@ -49,6 +49,8 @@ m6_web_kafka:
 
 Here a configuration example: 
 
+[Librdkafka global configuration properties](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
+
 ```yaml
 m6_web_kafka:
     event_dispatcher: true
@@ -56,10 +58,12 @@ m6_web_kafka:
        producer1:
            configuration:
                timeout.ms: 1000
+               queue.buffering.max.ms: 0 # Maximum time, in milliseconds, for buffering data on the producer queue. 1000ms by default. 
            brokers:
                - '127.0.0.1'
                - '10.05.05.19'
            log_level: 3
+           event_poll_timeout: 2000 #ms
            topics:
                batman:
                    configuration:

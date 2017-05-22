@@ -73,10 +73,22 @@ class ConsumerManager
      */
     public function consume(bool $autoCommit = true)
     {
-        $this->message =  $this->consumer->consume($this->timeoutConsumingQueue);
+        $key = uniqid('consume-');
+        $this->prepareEvent($this->getOrigin(), $key);
+        $this->message = $this->consumer->consume($this->timeoutConsumingQueue);
 
-        if ($this->message->err === RD_KAFKA_RESP_ERR_NO_ERROR && $autoCommit) {
-            $this->commit();
+        switch ($this->message->err) {
+            case RD_KAFKA_RESP_ERR_NO_ERROR:
+                $this->notifyEvent($key);
+                if ($autoCommit) {
+                    $this->commit();
+                }
+                break;
+            case RD_KAFKA_RESP_ERR__PARTITION_EOF:
+                break;
+            default:
+                $this->notifyResponseErrorEvent($key, $this->message->err);
+                break;
         }
 
         return $this->message;
@@ -87,7 +99,6 @@ class ConsumerManager
      */
     public function commit()
     {
-        $this->notifyEvent($this->getOrigin());
         $this->consumer->commit($this->message);
     }
 }
