@@ -50,10 +50,12 @@ class M6WebKafkaExtension extends Extension
             );
 
             // Use a factory to build the producer
-            $producerDefinition->setFactory([
-                new Reference('m6web_kafka.producer_factory'),
-                'get',
-            ]);
+            $producerDefinition
+                ->setFactory([
+                    new Reference('m6web_kafka.producer_factory'),
+                    'get',
+                ])
+                ->setLazy(true);
 
             $this->setEventDispatcher($config, $producerDefinition);
 
@@ -79,10 +81,12 @@ class M6WebKafkaExtension extends Extension
                 ]
             );
 
-            $consumerDefinition->setFactory([
-                new Reference('m6web_kafka.consumer_factory'),
-                'get',
-            ]);
+            $consumerDefinition
+                ->setFactory([
+                    new Reference('m6web_kafka.consumer_factory'),
+                    'get',
+                ])
+                ->setLazy(true);
 
             $this->setEventDispatcher($config, $consumerDefinition);
 
