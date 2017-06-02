@@ -37,8 +37,9 @@ class AbstractKafkaFactory
      */
     protected function getReadyConfiguration(array $configurationToSet = [])
     {
-        $revertConfigurationToSet = array_flip($configurationToSet);
-        array_walk($revertConfigurationToSet, [$this->configuration, 'set']);
+        foreach ($configurationToSet as $configKey => $configValue) {
+            $this->configuration->set($configKey, $configValue);
+        }
     }
 
     /**
@@ -47,7 +48,8 @@ class AbstractKafkaFactory
      */
     protected function getReadyTopicConf(array $configurationToSet = [])
     {
-        $revertConfigurationToSet = array_flip($configurationToSet);
-        array_walk($revertConfigurationToSet, [$this->topicConfiguration, 'set']);
+        foreach ($configurationToSet as $configKey => $configValue) {
+            $this->topicConfiguration->set($configKey, $configValue);
+        }
     }
 }

@@ -13,7 +13,9 @@ class ProducerFactory extends BaseUnitTest
     {
         $producerClass = 'RdKafka\Producer';
         $producerData  = [
-            'configuration' => [],
+            'configuration' => [
+                'api.version.request' => true
+            ],
             'brokers' => [
                 '127.0.0.1'
             ],
