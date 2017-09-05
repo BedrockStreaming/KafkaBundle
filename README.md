@@ -5,9 +5,9 @@ To consume messages, we decided to use the high level consumer.
 
 [Kafka documentation](http://kafka.apache.org/documentation.html)
 
-##Installation
+## Installation
 
-###For Symfony ###
+### For Symfony ###
 
 ````
 {
@@ -120,7 +120,7 @@ topics:
     - catwoman
  ```
  
-###Producer
+### Producer
 
 A producer will be used to send messages to the server.
 
@@ -147,7 +147,7 @@ The `RD_KAFKA_PARTITION_UA` constant is used according the strategy partitioner.
 - If the stratefy partitioner is `consistent` (`RD_KAFKA_MSG_PARTITIONER_CONSISTENT`) with a key defined, messages are assigned to the partition whose the id maps the hash of the key.
 If there is no key defined, messages are assigned to the same partition.
 
-###Consumer
+### Consumer
 
 A consumer will be used to get a message from different topics.
 You can choose to set only one topic by consumer.
@@ -178,7 +178,7 @@ It is the `\RdKafka\Message` from the [RdKafka extension](https://arnaud-lb.gith
 In case there is no more message, it will give you a _No more message_ string.
 In case there is a time out, it will give you a _Time out_ string.
 
-###Exceptions list
+### Exceptions list
 - EntityNotSetException
 - KafkaException
 - LogLevelNotSetException
