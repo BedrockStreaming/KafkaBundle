@@ -63,7 +63,7 @@ m6_web_kafka:
                - '127.0.0.1'
                - '10.05.05.19'
            log_level: 3
-           event_poll_timeout: 2000 #ms
+           events_poll_timeout: 2000 #ms
            topics:
                batman:
                    configuration:
