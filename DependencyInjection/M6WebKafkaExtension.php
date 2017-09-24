@@ -33,7 +33,7 @@ class M6WebKafkaExtension extends Extension
         $this->loadProducers($container, $config);
         $this->loadConsumers($container, $config);
 
-        $container->setParameter('m6web_kafka.prefix_name', $config['prefix_services_name']);
+        $container->setParameter('m6web_kafka.services_name_prefix', $config['services_name_prefix']);
     }
 
     /**
@@ -64,7 +64,7 @@ class M6WebKafkaExtension extends Extension
             $this->setEventDispatcher($config, $producerDefinition);
 
             $container->setDefinition(
-                sprintf('%s.producer.%s', $config['prefix_services_name'], $key),
+                sprintf('%s.producer.%s', $config['services_name_prefix'], $key),
                 $producerDefinition
             );
         }
@@ -73,7 +73,6 @@ class M6WebKafkaExtension extends Extension
     /**
      * @param ContainerBuilder $container
      * @param array $config
-     * @throws \Symfony\Component\DependencyInjection\Exception\BadMethodCallException
      */
     protected function loadConsumers(ContainerBuilder $container, array $config)
     {
@@ -96,7 +95,7 @@ class M6WebKafkaExtension extends Extension
             $this->setEventDispatcher($config, $consumerDefinition);
 
             $container->setDefinition(
-                sprintf('%s.consumer.%s', $config['prefix_services_name'], $key),
+                sprintf('%s.consumer.%s', $config['services_name_prefix'], $key),
                 $consumerDefinition
             );
         }

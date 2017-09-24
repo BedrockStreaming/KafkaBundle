@@ -53,7 +53,7 @@ Here a configuration example:
 
 ```yaml
 m6_web_kafka:
-    prefix_services_name: 'custom_prefix'
+    services_name_prefix: 'custom_prefix'
     event_dispatcher: true
     producers:
        producer1:
@@ -206,10 +206,10 @@ class TestConsumer implements MessageHandlerInterface
 }
 ```
 
-Then you could start consuming messages executing this command:
+Then you could start consuming messages executing this command with your consumer and service name:
 
 ```
-php bin/console kafka:consume --consumer you_consumer_name --handler "AppBundle\Service\TestConsumer"
+php bin/console kafka:consume you_consumer_name "AppBundle\Service\TestConsumer"
 ```
 
 Also you can add --auto-commit option to enable auto commit in every consumed message.
