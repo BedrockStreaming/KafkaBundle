@@ -20,6 +20,7 @@ class M6WebKafkaExtension extends Extension
 {
     /**
      * {@inheritDoc}
+     * @throws \Symfony\Component\DependencyInjection\Exception\BadMethodCallException
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -31,11 +32,14 @@ class M6WebKafkaExtension extends Extension
 
         $this->loadProducers($container, $config);
         $this->loadConsumers($container, $config);
+
+        $container->setParameter('m6web_kafka.prefix_name', $config['prefix_services_name']);
     }
 
     /**
      * @param ContainerBuilder $container
-     * @param array            $config
+     * @param array $config
+     * @throws \Symfony\Component\DependencyInjection\Exception\BadMethodCallException
      */
     protected function loadProducers(ContainerBuilder $container, array $config)
     {
@@ -60,7 +64,7 @@ class M6WebKafkaExtension extends Extension
             $this->setEventDispatcher($config, $producerDefinition);
 
             $container->setDefinition(
-                sprintf('m6_web_kafka.producer.%s', $key),
+                sprintf('%s.producer.%s', $config['prefix_services_name'], $key),
                 $producerDefinition
             );
         }
@@ -68,7 +72,8 @@ class M6WebKafkaExtension extends Extension
 
     /**
      * @param ContainerBuilder $container
-     * @param array            $config
+     * @param array $config
+     * @throws \Symfony\Component\DependencyInjection\Exception\BadMethodCallException
      */
     protected function loadConsumers(ContainerBuilder $container, array $config)
     {
@@ -91,15 +96,16 @@ class M6WebKafkaExtension extends Extension
             $this->setEventDispatcher($config, $consumerDefinition);
 
             $container->setDefinition(
-                sprintf('m6_web_kafka.consumer.%s', $key),
+                sprintf('%s.consumer.%s', $config['prefix_services_name'], $key),
                 $consumerDefinition
             );
         }
     }
 
     /**
-     * @param array      $config
+     * @param array $config
      * @param Definition $definition
+     * @throws \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
      */
     protected function setEventDispatcher(array $config, Definition $definition)
     {

@@ -53,6 +53,7 @@ Here a configuration example:
 
 ```yaml
 m6_web_kafka:
+    prefix_services_name: 'custom_prefix'
     event_dispatcher: true
     producers:
        producer1:
@@ -165,6 +166,8 @@ But you can choose not to do it by adding an argument as following:
 $consumer->consume(false);
 ```
 
+*Note:* Setting $consumer->consume(false) boost consuming performance, avoiding to commit every single kafka consumed message.
+
 You can decide to commit manually your message with:
 ```php
 $consumer->commit();
@@ -177,6 +180,43 @@ It is the `\RdKafka\Message` from the [RdKafka extension](https://arnaud-lb.gith
 
 In case there is no more message, it will give you a _No more message_ string.
 In case there is a time out, it will give you a _Time out_ string.
+
+#### Consuming from CLI
+
+You can use your own service to process Kakfa topic messages and run it from Symfony special command provided by us.
+
+At first you have to create your own service implementing MessageHandlerInterface. For example:
+
+```php
+<?php
+
+namespace AppBundle\Service;
+
+use M6Web\Bundle\KafkaBundle\Handler\MessageHandlerInterface;
+use RdKafka\Message;
+
+class TestConsumer implements MessageHandlerInterface
+{
+
+    public function process(Message $message)
+    {
+        echo $message->payload. PHP_EOL;
+    }
+
+}
+```
+
+Then you could start consuming messages executing this command:
+
+```
+php bin/console kafka:consume --consumer you_consumer_name --handler "AppBundle\Service\TestConsumer"
+```
+
+Also you can add --auto-commit option to enable auto commit in every consumed message.
+
+*Note:* If you aren't using *Symfony Automatic Service Loading*, introduced in Symfony 3.3, you have to put in handler option your service name instead of FQCN.
+
+This Symfony command provide *signal management* too, handling SIGQUIT, SIGTERM and SIGINT to do a gracefully shutdown, committing last processed message and exiting.
 
 ### Exceptions list
 - EntityNotSetException
