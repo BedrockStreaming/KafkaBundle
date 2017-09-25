@@ -14,4 +14,9 @@ interface MessageHandlerInterface
      */
     public function process(Message $message);
 
+    /**
+     * @return mixed
+     */
+    public function endOfPartitionReached();
+
 }

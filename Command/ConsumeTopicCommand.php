@@ -1,6 +1,6 @@
 <?php
 
-declare(ticks = 1);
+declare(ticks=1);
 
 namespace M6Web\Bundle\KafkaBundle\Command;
 
@@ -24,7 +24,7 @@ class ConsumeTopicCommand extends ContainerAwareCommand
             ->addArgument('consumer', InputArgument::REQUIRED, 'Consumer name')
             ->addArgument('handler', InputArgument::REQUIRED, 'Handler service name')
             ->addOption('auto-commit', null, InputOption::VALUE_NONE, 'Auto commit enabled?')
-        ;
+            ->addOption('memory-max', null, InputOption::VALUE_REQUIRED, 'Memory max in bytes');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -35,6 +35,7 @@ class ConsumeTopicCommand extends ContainerAwareCommand
         $consumer = $input->getArgument('consumer');
         $handler = $input->getArgument('handler');
         $autoCommit = $input->getOption('auto-commit');
+        $memoryMax = $input->getOption('memory-max');
 
         /**
          * @var ConsumerManager $topicConsumer
@@ -52,7 +53,7 @@ class ConsumeTopicCommand extends ContainerAwareCommand
             throw new \Exception(sprintf("Message Handler with name '%s' is not defined", $handler));
         }
 
-        $output->writeln('<comment>Waiting for partition assignment... (make take some time when quickly re-joining the group after leaving it.)'.PHP_EOL.'</comment>');
+        $output->writeln('<comment>Waiting for partition assignment... (make take some time when quickly re-joining the group after leaving it.)' . PHP_EOL . '</comment>');
 
         $this->registerSigHandlers();
 
@@ -65,6 +66,7 @@ class ConsumeTopicCommand extends ContainerAwareCommand
                     break;
                 case RD_KAFKA_RESP_ERR__PARTITION_EOF:
                     $output->writeln('<question>No more messages; will wait for more</question>');
+                    $messageHandler->endOfPartitionReached();
                     break;
                 case RD_KAFKA_RESP_ERR__TIMED_OUT:
                     $output->writeln('<question>Timed out</question>');
@@ -74,7 +76,12 @@ class ConsumeTopicCommand extends ContainerAwareCommand
                     break;
             }
 
-            if($this->shutdown) {
+            if ($memoryMax !== null && memory_get_peak_usage(true) >= $memoryMax) {
+                $output->writeln('<question>Memory limit exceeded!</question>');
+                $this->shutdownFn();
+            }
+
+            if ($this->shutdown) {
                 $output->writeln('<question>Shuting down...</question>');
                 if ($message->err === RD_KAFKA_RESP_ERR_NO_ERROR) {
                     $topicConsumer->commit();
@@ -84,18 +91,7 @@ class ConsumeTopicCommand extends ContainerAwareCommand
             }
         }
 
-        $output->writeln('<info>End consuming topic gracefully</info>');
-    }
-
-    private function registerSigHandlers()
-    {
-        if(!function_exists('pcntl_signal')) {
-            return;
-        }
-
-        pcntl_signal(SIGTERM, [$this, 'shutdownFn']);
-        pcntl_signal(SIGINT, [$this, 'shutdownFn']);
-        pcntl_signal(SIGQUIT, [$this, 'shutdownFn']);
+        $output->writeln('<info>End consuming topic successfully</info>');
     }
 
     public function shutdownFn()
@@ -103,4 +99,14 @@ class ConsumeTopicCommand extends ContainerAwareCommand
         $this->shutdown = true;
     }
 
+    private function registerSigHandlers()
+    {
+        if (!function_exists('pcntl_signal')) {
+            return;
+        }
+
+        pcntl_signal(SIGTERM, [$this, 'shutdownFn']);
+        pcntl_signal(SIGINT, [$this, 'shutdownFn']);
+        pcntl_signal(SIGQUIT, [$this, 'shutdownFn']);
+    }
 }
