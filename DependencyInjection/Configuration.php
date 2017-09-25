@@ -20,6 +20,7 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
+                ->scalarNode('services_name_prefix')->defaultValue('m6_web_kafka')->end()
                 ->booleanNode('event_dispatcher')->defaultTrue()->end()
                 ->arrayNode('consumers')
                     ->useAttributeAsKey('key')
